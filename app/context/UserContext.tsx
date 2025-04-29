@@ -33,7 +33,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const { context } = useMiniKit();
-  const { signIn: authenticate } = useAuthenticate();
+  const { signIn } = useAuthenticate();
 
   const [dbUser, setDbUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -111,9 +111,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const handleSignIn = async (): Promise<boolean> => {
     try {
-      const result = await authenticate({
-        domain: process.env.NEXT_PUBLIC_URL || "https://castmark.app",
-        siweUri: `${process.env.NEXT_PUBLIC_URL || "https://castmark.app"}/login`,
+      const result = await signIn({
+        domain: "your-domain.com",
+        siweUri: "https://your-domain.com/login",
       });
 
       if (result && result.message && result.signature) {
