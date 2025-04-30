@@ -4,6 +4,7 @@ import { Bookmark } from "@/lib/supabase";
 import { useBookmarkStore } from "../../stores/bookmarkStore";
 import { FiX, FiPlusCircle } from "react-icons/fi";
 import { useUser } from "../../context/UserContext";
+import { useNotification } from "@coinbase/onchainkit/minikit";
 
 interface BookmarkFormProps {
   existingBookmark?: Bookmark;
@@ -35,6 +36,7 @@ export default function BookmarkForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditing = !!existingBookmark;
+  const sendNotification = useNotification();
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -61,14 +63,15 @@ export default function BookmarkForm({
     setIsSubmitting(true);
 
     try {
+      let savedBookmark;
       if (isEditing && existingBookmark) {
-        await updateBookmark(existingBookmark.id, {
+        savedBookmark = await updateBookmark(existingBookmark.id, {
           note,
           tags,
           is_public: isPublic,
         });
       } else if (castData) {
-        await addBookmark({
+        savedBookmark = await addBookmark({
           user_id: dbUser.id,
           cast_hash: castData.hash,
           cast_author_fid: castData.authorFid,
@@ -78,6 +81,18 @@ export default function BookmarkForm({
           tags,
           is_public: isPublic,
         });
+
+        // Send notification for new bookmarks
+        if (savedBookmark) {
+          try {
+            await sendNotification({
+              title: "Bookmark Saved!",
+              body: `You saved a cast${tags.length > 0 ? ` with tags: ${tags.join(", ")}` : ""}`,
+            });
+          } catch (notifError) {
+            console.error("Failed to send notification:", notifError);
+          }
+        }
       }
 
       onSuccess?.();
