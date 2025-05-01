@@ -1,8 +1,16 @@
-// components/bookmark/BookmarkCard.tsx
+// components/bookmark/BookmarkCard.tsx (update)
 import { Bookmark } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
-import { FiTrash2, FiEdit, FiTag } from "react-icons/fi";
-import { useBookmarkStore } from "../../stores/bookmarkStore";
+import {
+  FiTrash2,
+  FiEdit,
+  FiShare2,
+  FiTag,
+  FiFolderPlus,
+} from "react-icons/fi";
+import { useBookmarkStore } from "@/stores/bookmarkStore";
+import { useState } from "react";
+import AddToCollectionModal from "./AddToCollectionModal";
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
@@ -11,6 +19,7 @@ interface BookmarkCardProps {
 
 export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
   const { deleteBookmark } = useBookmarkStore();
+  const [showAddToCollection, setShowAddToCollection] = useState(false);
 
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this bookmark?")) {
@@ -42,6 +51,13 @@ export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
           </div>
         </div>
         <div className="flex space-x-2">
+          <button
+            onClick={() => setShowAddToCollection(true)}
+            className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+            aria-label="Add to collection"
+          >
+            <FiFolderPlus size={18} />
+          </button>
           <button
             onClick={() => onEdit && onEdit(bookmark)}
             className="p-2 text-gray-500 hover:text-purple-600 transition-colors"
@@ -77,6 +93,14 @@ export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
             </span>
           ))}
         </div>
+      )}
+
+      {/* Modal for adding to collection */}
+      {showAddToCollection && (
+        <AddToCollectionModal
+          bookmarkId={bookmark.id}
+          onClose={() => setShowAddToCollection(false)}
+        />
       )}
     </div>
   );
