@@ -1,12 +1,12 @@
-// app/bookmarks/page.tsx
+// app/collections/page.tsx
 "use client";
 
 import { useEffect } from "react";
 import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft } from "react-icons/fi";
-import BookmarkList from "../components/bookmark/BookmarkList";
+import CollectionsList from "@/components/collection/CollectionsList";
 
-export default function BookmarksPage() {
+export default function CollectionsPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const close = useClose();
 
@@ -19,27 +19,19 @@ export default function BookmarksPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center">
-      <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b border-gray-200">
-        <div className="flex items-center">
-          <button
-            onClick={() => window.history.back()}
-            className="mr-4 p-2 rounded-full hover:bg-gray-100"
-            aria-label="Go back"
-          >
-            <FiArrowLeft size={20} />
-          </button>
-          <h1 className="text-xl font-bold">Your Bookmarks</h1>
-        </div>
-        <a
-          href="/collections"
-          className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
+      <header className="w-full max-w-3xl flex items-center p-4 border-b border-gray-200">
+        <button
+          onClick={() => window.history.back()}
+          className="mr-4 p-2 rounded-full hover:bg-gray-100"
+          aria-label="Go back"
         >
-          Collections
-        </a>
+          <FiArrowLeft size={20} />
+        </button>
+        <h1 className="text-xl font-bold">Your Collections</h1>
       </header>
 
       <div className="w-full max-w-3xl">
-        <BookmarkList />
+        <CollectionsList />
       </div>
 
       <div className="fixed bottom-4 right-4">
