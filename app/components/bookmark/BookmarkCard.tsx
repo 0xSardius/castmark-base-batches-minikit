@@ -1,13 +1,7 @@
 // components/bookmark/BookmarkCard.tsx (update)
 import { Bookmark } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
-import {
-  FiTrash2,
-  FiEdit,
-  FiShare2,
-  FiTag,
-  FiFolderPlus,
-} from "react-icons/fi";
+import { FiTrash2, FiEdit, FiTag, FiFolderPlus } from "react-icons/fi";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useState } from "react";
 import AddToCollectionModal from "./AddToCollectionModal";

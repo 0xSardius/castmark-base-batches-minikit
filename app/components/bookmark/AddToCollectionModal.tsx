@@ -1,9 +1,9 @@
 // components/bookmark/AddToCollectionModal.tsx
 import { useState, useEffect } from "react";
 import { FiX, FiPlus } from "react-icons/fi";
-import { useCollectionStore } from "~/stores/collectionStore";
-import { useUser } from "~/context/UserContext";
-import CollectionForm from "~/components/collection/CollectionForm";
+import { useCollectionStore } from "@/stores/collectionStore";
+import { useUser } from "@/context/UserContext";
+import CollectionForm from "@/components/collection/CollectionForm";
 
 interface AddToCollectionModalProps {
   bookmarkId: string;
@@ -91,7 +91,7 @@ export default function AddToCollectionModal({
             {collections.length === 0 ? (
               <div className="text-center p-6">
                 <p className="text-gray-600">
-                  You don't have any collections yet.
+                  You don&apos;t have any collections yet.
                 </p>
               </div>
             ) : (
