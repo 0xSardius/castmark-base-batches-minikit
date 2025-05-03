@@ -1,6 +1,7 @@
+// context/UserContext.tsx
 "use client";
 
-import {
+import React, {
   createContext,
   useContext,
   useEffect,
@@ -8,18 +9,11 @@ import {
   ReactNode,
 } from "react";
 import { useMiniKit, useAuthenticate } from "@coinbase/onchainkit/minikit";
-import { supabase, User } from "../../lib/supabase";
+import { supabase, User } from "@/lib/supabase"; // Adjust import path as needed
 
-interface ContextUser {
-  fid: number;
-  username?: string;
-  displayName?: string;
-  pfpUrl?: string;
-}
-
+// Define the context type
 interface UserContextType {
   dbUser: User | null;
-  contextUser: ContextUser | null;
   loading: boolean;
   isAuthenticated: boolean;
   signIn: () => Promise<boolean>;
@@ -29,9 +23,57 @@ interface UserContextType {
   refreshUser: () => Promise<void>;
 }
 
+// Create the context with a default undefined value
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+// AuthPrompt component used within the provider
+function AuthPrompt({
+  onCancel,
+  onSignIn,
+}: {
+  onCancel: () => void;
+  onSignIn: () => Promise<boolean>;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignIn = async () => {
+    setIsLoading(true);
+    await onSignIn();
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h2 className="text-xl font-bold mb-4">Sign in required</h2>
+        <p className="mb-4 text-gray-600">
+          You need to sign in with Farcaster to access this feature. Your
+          bookmarks will be saved to your account.
+        </p>
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
+            disabled={isLoading}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSignIn}
+            className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
+            disabled={isLoading}
+          >
+            {isLoading ? "Signing in..." : "Sign in with Farcaster"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Create the provider component
 export function UserProvider({ children }: { children: ReactNode }) {
+  // Place hooks inside the component function
   const { context } = useMiniKit();
   const { signIn } = useAuthenticate();
 
@@ -39,19 +81,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAuthPromptVisible, setIsAuthPromptVisible] = useState(false);
-
-  // Get user context from MiniKit
-  useEffect(() => {
-    if (context?.user?.fid) {
-      loadOrCreateUser(context.user.fid, {
-        username: context.user.username,
-        displayName: context.user.displayName,
-        pfpUrl: context.user.pfpUrl,
-      });
-    } else {
-      setLoading(false);
-    }
-  }, [context]);
 
   // Function to load or create a user in the database
   const loadOrCreateUser = async (
@@ -109,16 +138,33 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Get user context from MiniKit and load or create user in database
+  useEffect(() => {
+    if (context?.user?.fid) {
+      loadOrCreateUser(context.user.fid, {
+        username: context.user.username,
+        displayName: context.user.displayName,
+        pfpUrl: context.user.pfpUrl,
+      });
+    } else {
+      setLoading(false);
+    }
+  }, [context]);
+
   const handleSignIn = async (): Promise<boolean> => {
     try {
-      const result = await signIn({
-        domain: "your-domain.com",
-        siweUri: "https://your-domain.com/login",
+      // Get domain from environment or default
+      const domain = process.env.NEXT_PUBLIC_URL || "https://castmark.app";
+
+      // Authenticate using MiniKit
+      const result = await authenticate({
+        domain: domain,
+        siweUri: `${domain}/login`,
       });
 
       if (result && result.message && result.signature) {
-        // Verify the signature on your backend (we'll implement this later)
-        // For now, assume success if we got a result
+        // Authentication successful
+        // If we have user context from Frame SDK, use it
         if (context?.user?.fid) {
           await loadOrCreateUser(context.user.fid, {
             username: context.user.username,
@@ -138,7 +184,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const handleSignOut = async (): Promise<void> => {
-    // For now, just clear the local authentication state
+    // Clear authentication state
     setIsAuthenticated(false);
     setDbUser(null);
   };
@@ -178,7 +224,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     <UserContext.Provider
       value={{
         dbUser,
-        contextUser: context?.user || null,
         loading,
         isAuthenticated,
         signIn: handleSignIn,
@@ -196,50 +241,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function AuthPrompt({
-  onCancel,
-  onSignIn,
-}: {
-  onCancel: () => void;
-  onSignIn: () => Promise<boolean>;
-}) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSignIn = async () => {
-    setIsLoading(true);
-    await onSignIn();
-    setIsLoading(false);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h2 className="text-xl font-bold mb-4">Sign in required</h2>
-        <p className="mb-4 text-gray-600">
-          You need to sign in with Farcaster to access this feature. Your
-          bookmarks will be saved to your account.
-        </p>
-        <div className="flex justify-end space-x-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSignIn}
-            className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
-            disabled={isLoading}
-          >
-            {isLoading ? "Signing in..." : "Sign in with Farcaster"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+// Create and export the hook
 export function useUser() {
   const context = useContext(UserContext);
   if (context === undefined) {
@@ -247,3 +249,6 @@ export function useUser() {
   }
   return context;
 }
+
+// Export as default for convenience in imports
+export default useUser;

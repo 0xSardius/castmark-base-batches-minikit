@@ -8,7 +8,7 @@ import {
   useOpenUrl,
 } from "@coinbase/onchainkit/minikit";
 import { useUser } from "@/context/UserContext";
-import { FiBookmark, FiFolder, FiPlus, FiShare2 } from "react-icons/fi";
+import { FiBookmark, FiFolder, FiPlus } from "react-icons/fi";
 
 export default function Home() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
