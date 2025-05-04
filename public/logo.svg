@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Purple background with rounded corners -->
+  <rect x="10" y="10" width="180" height="180" rx="30" ry="30" fill="#6D28D9" />
+  
+  <!-- White bookmark icon, centered and scaled appropriately -->
+  <g transform="translate(60, 35) scale(0.21)">
+    <path fill="white" d="M0 48V487.7C0 501.1 10.9 512 24.3 512c5 0 9.9-1.5 14-4.4L192 400 345.7 507.6c4.1 2.9 9 4.4 14 4.4c13.4 0 24.3-10.9 24.3-24.3V48c0-26.5-21.5-48-48-48H48C21.5 0 0 21.5 0 48z"/>
+  </g>
+</svg>
