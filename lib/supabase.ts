@@ -12,6 +12,7 @@ export type User = {
   display_name: string | null;
   pfp_url: string | null;
   bio: string | null;
+  wallet_address: string | null;
   created_at: string;
   last_login: string;
 };

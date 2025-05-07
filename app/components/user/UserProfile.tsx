@@ -1,5 +1,5 @@
 // components/user/UserProfile.tsx
-import { Identity, Avatar, Name, Address } from "@coinbase/onchainkit/identity";
+import { Identity, Avatar, Name } from "@coinbase/onchainkit/identity";
 import { useUser } from "@/context/UserContext";
 
 export default function UserProfile() {
@@ -7,21 +7,25 @@ export default function UserProfile() {
 
   if (!dbUser) return null;
 
-  // For this example, assuming we've added wallet_address to our User type
-  const walletAddress = (dbUser.wallet_address ||
-    "0x0000000000000000000000000000000000000000") as `0x${string}`;
+  // For Farcaster users, we'll use their FID to generate a proxy address for Identity component
+  // This is just for display purposes - in a real implementation, we'd use their actual ETH address
+  const proxyAddress =
+    `0x${dbUser.fid.toString(16).padStart(40, "0")}` as `0x${string}`;
 
   return (
-    <div className="border border-gray-200 rounded-lg p-6 mb-4">
-      <Identity address={walletAddress} hasCopyAddressOnClick>
-        <div className="flex items-center mb-4">
-          <Avatar className="h-16 w-16 rounded-full mr-4" />
-          <div>
-            <Name className="text-xl font-bold" />
-            <Address className="text-sm text-gray-600" />
+    <div className="border border-gray-200 rounded-lg p-6 mb-4 bg-white">
+      <div className="flex items-center mb-4">
+        {/* OnchainKit Identity component */}
+        <Identity address={proxyAddress}>
+          <div className="flex items-center">
+            <Avatar className="h-16 w-16 rounded-full mr-4" />
+            <div>
+              <Name className="text-xl font-bold" />
+              <div className="text-sm text-gray-600">FID: {dbUser.fid}</div>
+            </div>
           </div>
-        </div>
-      </Identity>
+        </Identity>
+      </div>
 
       <div className="mt-4 border-t border-gray-200 pt-4">
         <div className="grid grid-cols-3 gap-4 text-center">

@@ -9,6 +9,8 @@ import {
 } from "@coinbase/onchainkit/minikit";
 import { useUser } from "@/context/UserContext";
 import { FiBookmark, FiFolder, FiPlus, FiShare2 } from "react-icons/fi";
+import AuthStatus from "@/components/auth/AuthStatus";
+import SampleCast from "@/components/cast/SampleCast";
 
 export default function Home() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
@@ -119,6 +121,15 @@ export default function Home() {
                 color="bg-purple-50 text-purple-600"
               />
             </div>
+          </div>
+
+          <div className="mt-4">
+            <AuthStatus />
+          </div>
+
+          <div className="w-full max-w-xl mx-auto mt-6">
+            <h2 className="text-lg font-semibold mb-3">Sample Cast</h2>
+            <SampleCast />
           </div>
 
           <div className="mb-6">
