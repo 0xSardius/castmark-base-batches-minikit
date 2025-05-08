@@ -153,14 +153,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const handleSignIn = async (): Promise<boolean> => {
     try {
-      // Get domain from environment or default
-      const domain = process.env.NEXT_PUBLIC_URL || "https://castmark.app";
-
       // Authenticate using MiniKit
-      const result = await authenticate({
-        domain: domain,
-        siweUri: `${domain}/login`,
-      });
+      const result = await signIn();
 
       if (result && result.message && result.signature) {
         // Authentication successful
