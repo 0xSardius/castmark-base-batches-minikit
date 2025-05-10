@@ -1,17 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
+import {
+  useMiniKit,
+  useClose,
+  useNotification,
+} from "@coinbase/onchainkit/minikit";
 import { useUser } from "@/context/UserContext";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useCollectionStore } from "@/stores/collectionStore";
 // import Loading from "@/components/ui/Loading";
 import { FiCheck, FiFolder, FiX, FiAlertCircle } from "react-icons/fi";
-import { sendFrameNotification } from "@/lib/notification-client";
 
 export default function SavePage() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const close = useClose();
+  const sendNotification = useNotification();
   const { showAuthPrompt, dbUser } = useUser();
   const { addBookmark } = useBookmarkStore();
   const { collections, fetchCollections } = useCollectionStore();
@@ -87,14 +91,11 @@ export default function SavePage() {
         is_public: true,
       });
 
-      // Send notification
-      if (context?.user?.fid) {
-        await sendFrameNotification({
-          fid: context.user.fid,
-          title: "Cast Saved",
-          body: "Your cast has been saved to Castmark",
-        });
-      }
+      // Send notification using the hook
+      sendNotification({
+        title: "Cast Saved",
+        body: "Your cast has been saved to Castmark",
+      });
 
       setSaveSuccess(true);
 
