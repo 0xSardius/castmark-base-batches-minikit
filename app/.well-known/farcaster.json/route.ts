@@ -8,8 +8,8 @@ export async function GET() {
       signature: process.env.FARCASTER_SIGNATURE,
     },
     frame: {
-      version: process.env.NEXT_PUBLIC_VERSION,
-      name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
+      version: "next",
+      name: "Castmark",
       homeUrl: URL,
       iconUrl: process.env.NEXT_PUBLIC_ICON_URL,
       imageUrl: process.env.NEXT_PUBLIC_IMAGE_URL,
@@ -18,5 +18,13 @@ export async function GET() {
       splashBackgroundColor: `#${process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR}`,
       webhookUrl: `${URL}/api/webhook`,
     },
+    triggers: [
+      {
+        type: "cast",
+        id: "save-cast",
+        url: `${URL}/save`,
+        name: "Save to Castmark",
+      },
+    ],
   });
 }
