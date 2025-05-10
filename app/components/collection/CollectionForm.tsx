@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Collection } from "@/lib/supabase";
-import { useCollectionStore } from "@/stores/collectionStore";
-import { FiX } from "react-icons/fi";
 import { useUser } from "@/context/UserContext";
+import { useCollectionStore } from "@/stores/collectionStore";
+import { Collection } from "@/lib/supabase";
 
 interface CollectionFormProps {
   existingCollection?: Collection;
@@ -67,99 +66,82 @@ export default function CollectionForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">
-            {isEditing ? "Edit Collection" : "Create Collection"}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg w-full max-w-md border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <div className="border-b-4 border-black p-4">
+          <h2 className="text-2xl font-black">
+            {isEditing ? "Edit Collection" : "New Collection"}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Close"
-          >
-            <FiX size={24} />
-          </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Collection Name*
+        <form onSubmit={handleSubmit} className="p-4 space-y-6">
+          <div>
+            <label htmlFor="name" className="block font-bold mb-2 text-lg">
+              Collection Name
             </label>
             <input
               id="name"
               type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-              placeholder="My Collection"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 border-4 border-black rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-400"
+              placeholder="My Awesome Collection"
               required
-              minLength={1}
-              maxLength={100}
             />
           </div>
 
-          <div className="mb-4">
+          <div>
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block font-bold mb-2 text-lg"
             >
-              Description (optional)
+              Description
             </label>
             <textarea
               id="description"
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-              placeholder="What is this collection about?"
-              value={description || ""}
+              value={description}
               onChange={(e) => setDescription(e.target.value)}
-              maxLength={500}
+              className="w-full px-4 py-3 border-4 border-black rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-400"
+              placeholder="What's this collection about?"
+              rows={3}
             />
           </div>
 
-          <div className="mb-4 space-y-2">
-            <label className="flex items-center">
+          <div className="space-y-3">
+            <label className="flex items-center gap-3 p-3 border-4 border-black rounded-lg cursor-pointer hover:bg-purple-100 transition-colors">
               <input
                 type="checkbox"
-                className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                 checked={isPublic}
                 onChange={() => setIsPublic(!isPublic)}
+                className="w-5 h-5 border-2 border-black rounded checked:bg-purple-400"
               />
-              <span className="ml-2 text-sm text-gray-700">
-                Make this collection public
-              </span>
+              <span className="font-bold">Make this collection public</span>
             </label>
 
-            <label className="flex items-center">
+            <label className="flex items-center gap-3 p-3 border-4 border-black rounded-lg cursor-pointer hover:bg-purple-100 transition-colors">
               <input
                 type="checkbox"
-                className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                 checked={isCollaborative}
                 onChange={() => setIsCollaborative(!isCollaborative)}
+                className="w-5 h-5 border-2 border-black rounded checked:bg-purple-400"
               />
-              <span className="ml-2 text-sm text-gray-700">
-                Allow others to contribute to this collection
-              </span>
+              <span className="font-bold">Allow others to add casts</span>
             </label>
           </div>
 
-          <div className="flex justify-end mt-6 space-x-3">
+          <div className="flex gap-3 pt-4 border-t-4 border-black">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+              className="flex-1 px-6 py-3 bg-gray-200 rounded-lg border-4 border-black font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-purple-600 rounded-md text-white hover:bg-purple-700"
-              disabled={isSubmitting || !name.trim()}
+              className="flex-1 px-6 py-3 bg-purple-400 rounded-lg border-4 border-black font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
+              disabled={isSubmitting}
             >
               {isSubmitting ? "Saving..." : isEditing ? "Update" : "Create"}
             </button>

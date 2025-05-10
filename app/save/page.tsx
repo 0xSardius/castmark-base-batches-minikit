@@ -93,8 +93,8 @@ export default function SavePage() {
 
       // Send notification using the hook
       sendNotification({
-        title: "Cast Saved",
-        body: "Your cast has been saved to Castmark",
+        title: "Saved! 🎉",
+        body: "Cast added to your collection",
       });
 
       setSaveSuccess(true);
@@ -123,55 +123,54 @@ export default function SavePage() {
 
   if (saveSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6">
-        <div className="bg-green-100 rounded-full p-3 mb-4">
-          <FiCheck size={30} className="text-green-600" />
+      <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-white">
+        <div className="bg-green-400 rounded-lg p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <FiCheck size={40} className="text-black mb-4" />
+          <h2 className="text-2xl font-black mb-2">Saved Successfully!</h2>
+          <p className="text-black font-medium">
+            Cast has been added to your bookmarks
+          </p>
         </div>
-        <h2 className="text-xl font-bold mb-2">Saved Successfully!</h2>
-        <p className="text-gray-600 mb-4">
-          Cast has been added to your bookmarks.
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Save Cast</h1>
+    <div className="flex flex-col min-h-screen p-4 bg-white">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-black">Save Cast</h1>
         <button
           onClick={close}
-          className="p-2 rounded-full hover:bg-gray-100"
+          className="p-3 rounded-lg border-4 border-black bg-gray-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
           aria-label="Close"
         >
-          <FiX size={20} />
+          <FiX size={20} className="text-black" />
         </button>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center">
-          <FiAlertCircle className="text-red-500 mr-2" />
-          <p className="text-red-700 text-sm">{error}</p>
+        <div className="mb-6 p-4 bg-red-400 rounded-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center gap-3">
+            <FiAlertCircle size={24} className="text-black" />
+            <p className="text-black font-bold">{error}</p>
+          </div>
         </div>
       )}
 
-      <div className="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-200">
-        <p className="text-gray-700 line-clamp-3">
+      <div className="mb-6 p-4 bg-gray-100 rounded-lg border-4 border-black">
+        <p className="text-black font-medium">
           {castData.text || "No text content"}
         </p>
       </div>
 
-      <div className="mb-4">
-        <label
-          htmlFor="note"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+      <div className="mb-6">
+        <label htmlFor="note" className="block font-bold mb-2 text-lg">
           Add a note (optional)
         </label>
         <textarea
           id="note"
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+          className="w-full px-4 py-3 border-4 border-black rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-400"
           placeholder="Why is this cast important to you?"
           value={note}
           onChange={(e) => setNote(e.target.value)}
@@ -179,71 +178,83 @@ export default function SavePage() {
         />
       </div>
 
-      {collections.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-            <FiFolder size={16} className="mr-2" />
-            Add to collection (optional)
-          </h3>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {collections.map((collection) => (
-              <label
-                key={collection.id}
-                className={`flex items-center p-2 border rounded-md cursor-pointer ${
-                  selectedCollections.includes(collection.id)
-                    ? "border-purple-500 bg-purple-50"
-                    : "border-gray-200"
-                } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                  checked={selectedCollections.includes(collection.id)}
-                  onChange={() => toggleCollection(collection.id)}
-                  disabled={isSaving}
-                />
-                <span className="ml-2 text-sm">{collection.name}</span>
-              </label>
-            ))}
-          </div>
+      <div className="mb-6">
+        <h3 className="font-bold mb-3 text-lg flex items-center gap-2">
+          <FiFolder size={20} />
+          Add to collection (optional)
+        </h3>
+        <div className="space-y-3 max-h-40 overflow-y-auto">
+          {collections.map((collection) => (
+            <label
+              key={collection.id}
+              className={`flex items-center p-3 border-4 border-black rounded-lg cursor-pointer transition-colors ${
+                selectedCollections.includes(collection.id)
+                  ? "bg-purple-400"
+                  : "bg-white hover:bg-purple-100"
+              } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              <input
+                type="checkbox"
+                className="w-5 h-5 border-2 border-black rounded checked:bg-black"
+                checked={selectedCollections.includes(collection.id)}
+                onChange={() => toggleCollection(collection.id)}
+                disabled={isSaving}
+              />
+              <span className="ml-3 font-bold text-black">
+                {collection.name}
+              </span>
+            </label>
+          ))}
         </div>
-      )}
-
-      <div className="mt-auto">
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-        >
-          {isSaving ? (
-            <>
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Saving...
-            </>
-          ) : (
-            "Save to Castmark"
-          )}
-        </button>
       </div>
+
+      <button
+        onClick={handleSave}
+        disabled={isSaving}
+        className={`
+          w-full py-4 rounded-lg border-4 border-black font-bold text-black
+          shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+          hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+          active:shadow-none
+          transition-all
+          hover:translate-x-[2px] 
+          hover:translate-y-[2px]
+          active:translate-x-[4px] 
+          active:translate-y-[4px]
+          ${isSaving ? "bg-yellow-300" : "bg-purple-400"}
+          disabled:opacity-50 
+          disabled:cursor-not-allowed
+          flex items-center justify-center gap-2
+        `}
+      >
+        {isSaving ? (
+          <>
+            <svg
+              className="animate-spin h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Saving...
+          </>
+        ) : (
+          "Save to Castmark"
+        )}
+      </button>
     </div>
   );
 }

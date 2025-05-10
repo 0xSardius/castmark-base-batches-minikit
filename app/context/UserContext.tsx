@@ -138,6 +138,32 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const sessionCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("session="));
+
+        if (sessionCookie) {
+          const session = JSON.parse(
+            decodeURIComponent(sessionCookie.split("=")[1]),
+          );
+          if (session.fid && new Date(session.expiresAt) > new Date()) {
+            await loadOrCreateUser(session.fid, {
+              username: session.username,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error checking session:", err);
+      }
+    };
+
+    checkSession();
+  }, []);
+
   // Get user context from MiniKit and load or create user in database
   useEffect(() => {
     if (context?.user?.fid) {
@@ -178,9 +204,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const handleSignOut = async (): Promise<void> => {
-    // Clear authentication state
+    // Clear authentication state and session cookie
     setIsAuthenticated(false);
     setDbUser(null);
+    document.cookie =
+      "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   };
 
   const refreshUser = async () => {

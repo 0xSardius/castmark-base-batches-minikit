@@ -27,10 +27,8 @@ export default function BookmarkButton({
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleSave = async () => {
-    // Skip if already saving or success state is showing
     if (isSaving || saveSuccess) return;
 
-    // Check authentication
     if (!dbUser) {
       const isAuth = await showAuthPrompt();
       if (!isAuth) return;
@@ -39,7 +37,6 @@ export default function BookmarkButton({
     setIsSaving(true);
 
     try {
-      // Quick save without notes or tags
       await addBookmark({
         user_id: dbUser!.id,
         cast_hash: castData.hash,
@@ -51,17 +48,15 @@ export default function BookmarkButton({
         tags: [],
       });
 
-      // Send notification
       try {
         await sendNotification({
-          title: "Bookmark Saved!",
-          body: `You saved a cast by @${castData.authorFid}`,
+          title: "Saved! 🎉",
+          body: "Cast added to your collection",
         });
       } catch (error) {
         console.error("Failed to send notification:", error);
       }
 
-      // Show success state temporarily
       setSaveSuccess(true);
       setTimeout(() => {
         setSaveSuccess(false);
@@ -73,17 +68,10 @@ export default function BookmarkButton({
     }
   };
 
-  // Determine icon and state
   const getIcon = () => {
     if (isSaving) return <FiLoader className="animate-spin" />;
     if (saveSuccess) return <FiCheck />;
     return <FiBookmark />;
-  };
-
-  // Determine color class based on state
-  const getColorClass = () => {
-    if (saveSuccess) return "text-green-600";
-    return "text-purple-600";
   };
 
   if (variant === "compact") {
@@ -91,10 +79,24 @@ export default function BookmarkButton({
       <button
         onClick={handleSave}
         disabled={isSaving}
-        className={`p-2 rounded-full hover:bg-gray-100 ${getColorClass()}`}
+        className={`
+          p-3 
+          rounded-lg 
+          border-4 
+          border-black 
+          shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+          hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+          active:shadow-none
+          transition-all
+          ${saveSuccess ? "bg-green-400" : isSaving ? "bg-yellow-300" : "bg-purple-400"}
+          hover:translate-x-[2px] 
+          hover:translate-y-[2px]
+          active:translate-x-[4px] 
+          active:translate-y-[4px]
+        `}
         aria-label="Save cast"
       >
-        {getIcon()}
+        <div className="text-black">{getIcon()}</div>
       </button>
     );
   }
@@ -103,12 +105,27 @@ export default function BookmarkButton({
     <button
       onClick={handleSave}
       disabled={isSaving}
-      className={`flex items-center space-x-1 px-3 py-1.5 rounded-md hover:bg-gray-100 ${getColorClass()}`}
+      className={`
+        flex items-center gap-2
+        px-4 py-2
+        rounded-lg 
+        border-4 
+        border-black 
+        shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+        hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+        active:shadow-none
+        transition-all
+        ${saveSuccess ? "bg-green-400" : isSaving ? "bg-yellow-300" : "bg-purple-400"}
+        hover:translate-x-[2px] 
+        hover:translate-y-[2px]
+        active:translate-x-[4px] 
+        active:translate-y-[4px]
+      `}
       aria-label="Save cast"
     >
-      {getIcon()}
-      <span className="text-sm font-medium">
-        {saveSuccess ? "Saved" : "Save"}
+      <div className="text-black">{getIcon()}</div>
+      <span className="font-bold text-black">
+        {saveSuccess ? "Saved!" : isSaving ? "Saving..." : "Save Cast"}
       </span>
     </button>
   );
