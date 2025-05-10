@@ -1,22 +1,16 @@
+// components/bookmark/BookmarksList.tsx
 import { useEffect, useState } from "react";
-import { useBookmarkStore } from "../../stores/bookmarkStore";
-import { useUser } from "../../context/UserContext";
-import { Bookmark } from "@/lib/supabase";
-import BookmarkCard from "./BookmarkCard";
-import BookmarkForm from "./BookmarkForm";
-import { FiPlusCircle } from "react-icons/fi";
+import { useBookmarkStore } from "@/stores/bookmarkStore";
+import { useUser } from "@/context/UserContext";
+import { Identity, Avatar, Name } from "@coinbase/onchainkit/identity";
+import { FiFolder } from "react-icons/fi";
+import Loading from "@/components/ui/loading";
+import BookmarkCard from "@/components/bookmark/BookmarkCard";
 
-export default function BookmarkList() {
-  const { dbUser, isAuthenticated, showAuthPrompt } = useUser();
-  const { bookmarks, loading, error, fetchBookmarks } = useBookmarkStore();
-  const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [castData, setCastData] = useState<{
-    hash: string;
-    authorFid: number;
-    text: string;
-    url: string;
-  } | null>(null);
+export default function BookmarksList() {
+  const { dbUser, loading: userLoading } = useUser();
+  const { bookmarks, loading, fetchBookmarks } = useBookmarkStore();
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   useEffect(() => {
     if (dbUser?.id) {
@@ -24,117 +18,105 @@ export default function BookmarkList() {
     }
   }, [dbUser, fetchBookmarks]);
 
-  const handleAddBookmark = async () => {
-    const isAuth = await showAuthPrompt();
-    if (!isAuth) return;
+  // Extract all unique tags from bookmarks
+  const allTags = Array.from(
+    new Set(
+      bookmarks.flatMap((bookmark) => bookmark.tags || []).filter(Boolean),
+    ),
+  );
 
-    // In a real implementation, we would get this data from the SDK or API
-    setCastData({
-      hash: "samplehash123",
-      authorFid: 123456,
-      text: "This is a sample cast that we want to bookmark.",
-      url: "https://warpcast.com/~/cast/samplehash123",
-    });
-    setShowAddForm(true);
-  };
+  // Filter bookmarks by selected tag
+  const filteredBookmarks = selectedTag
+    ? bookmarks.filter((bookmark) => bookmark.tags?.includes(selectedTag))
+    : bookmarks;
 
-  const handleEditBookmark = (bookmark: Bookmark) => {
-    setEditingBookmark(bookmark);
-  };
-
-  const handleCloseForm = () => {
-    setEditingBookmark(null);
-    setShowAddForm(false);
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex flex-col items-center justify-center p-6 text-center">
-        <h2 className="text-xl font-bold mb-2">
-          Sign in to view your bookmarks
-        </h2>
-        <p className="text-gray-600 mb-4">
-          Sign in with your Farcaster account to save and manage your bookmarks.
-        </p>
-        <button
-          onClick={() => showAuthPrompt()}
-          className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
-        >
-          Sign in with Farcaster
-        </button>
-      </div>
-    );
-  }
-
-  if (loading && bookmarks.length === 0) {
-    return (
-      <div className="flex justify-center p-6">
-        <div className="animate-pulse text-gray-600">Loading bookmarks...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center p-6">
-        <div className="text-red-500">{error}</div>
-      </div>
-    );
+  if (userLoading || loading) {
+    return <Loading />;
   }
 
   return (
     <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Your Bookmarks</h1>
-        <div className="flex space-x-2">
-          <button
-            onClick={handleAddBookmark}
-            className="flex items-center px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
-          >
-            <FiPlusCircle size={18} className="mr-2" />
-            Add Bookmark
-          </button>
-        </div>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl font-bold">Your Bookmarks</h1>
+        <a
+          href="/collections"
+          className="flex items-center text-sm bg-purple-100 text-purple-700 px-3 py-1.5 rounded-md hover:bg-purple-200"
+        >
+          <FiFolder size={16} className="mr-1" /> Collections
+        </a>
       </div>
 
-      {bookmarks.length === 0 ? (
+      {allTags.length > 0 && (
+        <div className="mb-4 overflow-x-auto pb-2">
+          <div className="flex space-x-2">
+            <button
+              className={`whitespace-nowrap px-3 py-1 rounded-full text-sm ${
+                selectedTag === null
+                  ? "bg-purple-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+              onClick={() => setSelectedTag(null)}
+            >
+              All
+            </button>
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                className={`whitespace-nowrap px-3 py-1 rounded-full text-sm ${
+                  selectedTag === tag
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+                onClick={() => setSelectedTag(tag)}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {filteredBookmarks.length === 0 ? (
         <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-600 mb-4">
-            You haven&apos;t saved any bookmarks yet.
+          <p className="text-gray-600 mb-2">
+            You don&apos;t have any bookmarks yet
           </p>
-          <button
-            onClick={handleAddBookmark}
-            className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
+          <p className="text-sm text-gray-500 mb-4">
+            Start saving casts that matter to you
+          </p>
+          <a
+            href="/"
+            className="inline-block px-4 py-2 bg-purple-600 text-white rounded-lg"
           >
-            Add your first bookmark
-          </button>
+            Discover Casts
+          </a>
         </div>
       ) : (
-        <div>
-          {bookmarks.map((bookmark) => (
-            <BookmarkCard
-              key={bookmark.id}
-              bookmark={bookmark}
-              onEdit={handleEditBookmark}
-            />
-          ))}
+        <div className="space-y-4">
+          {filteredBookmarks.map((bookmark) => {
+            // Generate a proxy address for OnchainKit Identity from FID
+            const authorProxyAddress =
+              `0x${bookmark.cast_author_fid?.toString(16).padStart(40, "0")}` as `0x${string}`;
+
+            return (
+              <div
+                key={bookmark.id}
+                className="border border-gray-200 rounded-lg p-4 bg-white"
+              >
+                <div className="mb-2">
+                  <Identity address={authorProxyAddress}>
+                    <div className="flex items-center">
+                      <Avatar className="h-6 w-6 mr-2" />
+                      <Name className="text-sm font-medium" />
+                    </div>
+                  </Identity>
+                </div>
+
+                <BookmarkCard bookmark={bookmark} />
+              </div>
+            );
+          })}
         </div>
-      )}
-
-      {editingBookmark && (
-        <BookmarkForm
-          existingBookmark={editingBookmark}
-          onClose={handleCloseForm}
-          onSuccess={() => fetchBookmarks(dbUser?.id || "")}
-        />
-      )}
-
-      {showAddForm && castData && (
-        <BookmarkForm
-          castData={castData}
-          onClose={handleCloseForm}
-          onSuccess={() => fetchBookmarks(dbUser?.id || "")}
-        />
       )}
     </div>
   );

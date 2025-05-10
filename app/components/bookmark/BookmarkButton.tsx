@@ -1,9 +1,8 @@
-// components/bookmark/BookmarkButton.tsx (refined version)
+// components/bookmark/BookmarkButton.tsx
 import { useState } from "react";
 import { FiBookmark, FiCheck, FiLoader } from "react-icons/fi";
 import { useUser } from "@/context/UserContext";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
-import BookmarkForm from "@/components/bookmark/BookmarkForm";
 import { useNotification } from "@coinbase/onchainkit/minikit";
 
 interface BookmarkButtonProps {
@@ -13,25 +12,31 @@ interface BookmarkButtonProps {
     text: string;
     url: string;
   };
+  variant?: "default" | "compact";
 }
 
-export default function BookmarkButton({ castData }: BookmarkButtonProps) {
+export default function BookmarkButton({
+  castData,
+  variant = "default",
+}: BookmarkButtonProps) {
   const { showAuthPrompt, dbUser } = useUser();
   const { addBookmark } = useBookmarkStore();
   const sendNotification = useNotification();
 
-  const [showForm, setShowForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const handleQuickSave = async () => {
+  const handleSave = async () => {
+    // Skip if already saving or success state is showing
+    if (isSaving || saveSuccess) return;
+
+    // Check authentication
     if (!dbUser) {
       const isAuth = await showAuthPrompt();
       if (!isAuth) return;
     }
 
     setIsSaving(true);
-    setSaveSuccess(false);
 
     try {
       // Quick save without notes or tags
@@ -46,67 +51,65 @@ export default function BookmarkButton({ castData }: BookmarkButtonProps) {
         tags: [],
       });
 
-      // Show success feedback
-      setSaveSuccess(true);
-
       // Send notification
       try {
         await sendNotification({
           title: "Bookmark Saved!",
-          body: `You saved a cast: ${castData.text.substring(0, 60)}${castData.text.length > 60 ? "..." : ""}`,
+          body: `You saved a cast by @${castData.authorFid}`,
         });
-      } catch (notifError) {
-        console.error("Failed to send notification:", notifError);
+      } catch (error) {
+        console.error("Failed to send notification:", error);
       }
 
-      // Hide success indicator after 2 seconds
+      // Show success state temporarily
+      setSaveSuccess(true);
       setTimeout(() => {
         setSaveSuccess(false);
       }, 2000);
     } catch (error) {
       console.error("Error saving bookmark:", error);
-      alert("Failed to save bookmark. Please try again.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleShowForm = async () => {
-    const isAuth = await showAuthPrompt();
-    if (isAuth) {
-      setShowForm(true);
-    }
+  // Determine icon and state
+  const getIcon = () => {
+    if (isSaving) return <FiLoader className="animate-spin" />;
+    if (saveSuccess) return <FiCheck />;
+    return <FiBookmark />;
   };
 
-  return (
-    <div className="relative inline-block">
-      <div className="flex space-x-1">
-        <button
-          onClick={handleQuickSave}
-          disabled={isSaving || saveSuccess}
-          className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100"
-          aria-label="Quick Save"
-        >
-          {isSaving ? (
-            <FiLoader size={20} className="text-gray-400 animate-spin" />
-          ) : saveSuccess ? (
-            <FiCheck size={20} className="text-green-600" />
-          ) : (
-            <FiBookmark size={20} className="text-purple-600" />
-          )}
-        </button>
-        <button
-          onClick={handleShowForm}
-          className="text-xs text-gray-500 hover:text-purple-600"
-          disabled={isSaving || saveSuccess}
-        >
-          Add note
-        </button>
-      </div>
+  // Determine color class based on state
+  const getColorClass = () => {
+    if (saveSuccess) return "text-green-600";
+    return "text-purple-600";
+  };
 
-      {showForm && (
-        <BookmarkForm castData={castData} onClose={() => setShowForm(false)} />
-      )}
-    </div>
+  if (variant === "compact") {
+    return (
+      <button
+        onClick={handleSave}
+        disabled={isSaving}
+        className={`p-2 rounded-full hover:bg-gray-100 ${getColorClass()}`}
+        aria-label="Save cast"
+      >
+        {getIcon()}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleSave}
+      disabled={isSaving}
+      className={`flex items-center space-x-1 px-3 py-1.5 rounded-md hover:bg-gray-100 ${getColorClass()}`}
+      aria-label="Save cast"
+    >
+      {getIcon()}
+      <span className="text-sm font-medium">
+        {saveSuccess ? "Saved" : "Save"}
+      </span>
+    </button>
   );
 }
