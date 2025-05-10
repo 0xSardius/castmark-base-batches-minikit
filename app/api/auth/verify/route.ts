@@ -1,56 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  Message,
-  MessageData,
-  MessageType,
-  FarcasterNetwork,
-} from "@farcaster/hub-nodejs";
+import { cookies } from "next/headers";
 
-// This is a placeholder for now - in a full implementation,
-// you would verify the Farcaster signature here
+interface FrameActionPayload {
+  untrustedData: {
+    fid: number;
+    username: string;
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { message, signature } = await req.json();
+    const body = await req.json();
+    const payload = body as FrameActionPayload;
 
-    // Decode the message bytes into a Message object
-    const frameMessage = Message.decode(Buffer.from(message, "hex"));
-
-    // Extract the signature components
-    const messageSignature = Buffer.from(signature).toString("hex");
-
-    // Create the message data object
-    const messageData: MessageData = {
-      type: frameMessage.data?.type as MessageType,
-      fid: frameMessage.data?.fid as number,
-      timestamp: frameMessage.data?.timestamp as number,
-      network: frameMessage.data?.network as FarcasterNetwork,
-      frameActionBody: frameMessage.data?.frameActionBody,
+    // Create session
+    const session = {
+      fid: payload.untrustedData.fid,
+      username: payload.untrustedData.username,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     };
 
-    // Encode the message data
-    const messageEncoded = MessageData.encode(messageData).finish();
-
-    // Verify the signature using the hub's validation endpoint
-    const hubResponse = await fetch(
-      "https://hub.farcaster.xyz/v1/validateMessage",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/octet-stream",
-        },
-        body: messageEncoded,
-      },
-    );
-
-    const validationResult = await hubResponse.json();
-
-    if (!validationResult.valid) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
+    // Set session cookie
+    cookies().set("session", JSON.stringify(session), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60, // 24 hours
+    });
 
     return NextResponse.json({
       success: true,
-      fid: messageData.fid,
+      fid: session.fid,
+      username: session.username,
     });
   } catch (error) {
     console.error("Auth error:", error);
