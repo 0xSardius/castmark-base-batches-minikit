@@ -1,28 +1,48 @@
-// components/collection/SimpleCollectionView.tsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCollectionStore } from "@/stores/collectionStore";
 import { useUser } from "@/context/UserContext";
 import { FiPlus, FiShare2 } from "react-icons/fi";
-import { useComposeCast } from "@coinbase/onchainkit/minikit";
+import { useOpenUrl, useMiniKit } from "@coinbase/onchainkit/minikit";
 
 export default function SimpleCollectionView() {
   const { dbUser } = useUser();
   const { collections, fetchCollections } = useCollectionStore();
-  const composeCast = useComposeCast();
+  const openUrl = useOpenUrl();
+  const { setFrameReady, isFrameReady } = useMiniKit();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (dbUser?.id) {
-      fetchCollections(dbUser.id);
+    if (!isFrameReady) {
+      setFrameReady();
     }
+  }, [isFrameReady, setFrameReady]);
+
+  useEffect(() => {
+    const loadCollections = async () => {
+      if (dbUser?.id) {
+        setIsLoading(true);
+        setError(null);
+        try {
+          await fetchCollections(dbUser.id);
+        } catch (err) {
+          setError("Failed to load collections. Please try again.");
+          console.error("Error loading collections:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    loadCollections();
   }, [dbUser, fetchCollections]);
 
   const handleShare = async (collectionId: string, name: string) => {
     try {
-      await composeCast({
-        text: `Check out my "${name}" collection on Castmark!`,
-        embeds: [`${process.env.NEXT_PUBLIC_URL}/collections/${collectionId}`],
-      });
+      setError(null);
+      const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(`${process.env.NEXT_PUBLIC_URL}/collections/${collectionId}`)}`;
+      openUrl(shareUrl);
     } catch (error) {
+      setError("Failed to share collection. Please try again.");
       console.error("Error sharing collection:", error);
     }
   };
@@ -36,7 +56,18 @@ export default function SimpleCollectionView() {
         </button>
       </div>
 
-      {collections.length === 0 ? (
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="text-center p-6">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="text-gray-600 mt-2">Loading collections...</p>
+        </div>
+      ) : collections.length === 0 ? (
         <div className="text-center p-6 border border-dashed border-gray-300 rounded-lg">
           <p className="text-gray-600 mb-2">
             You haven&apos;t created any collections yet
