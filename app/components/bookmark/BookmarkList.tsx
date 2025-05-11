@@ -113,6 +113,20 @@ export default function BookmarksList() {
                 </div>
 
                 <BookmarkCard bookmark={bookmark} />
+
+                {/* Tag display */}
+                {bookmark.tags && bookmark.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {bookmark.tags.map((tag: string) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border-2 border-black"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
