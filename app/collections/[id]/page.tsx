@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMiniKit, useClose, useOpenUrl } from "@coinbase/onchainkit/minikit";
+import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft, FiShare2, FiEdit, FiPlus, FiX } from "react-icons/fi";
 import { useCollectionStore } from "@/stores/collectionStore";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
@@ -19,7 +19,6 @@ export default function CollectionDetailPage({
 }) {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const close = useClose();
-  const openUrl = useOpenUrl();
   const { dbUser } = useUser();
 
   const {
@@ -36,6 +35,7 @@ export default function CollectionDetailPage({
 
   const [editingCollection, setEditingCollection] = useState(false);
   const [addingBookmark, setAddingBookmark] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Initialize the frame
   useEffect(() => {
@@ -73,15 +73,6 @@ export default function CollectionDetailPage({
   const collectionBookmarks = bookmarks.filter((bookmark) =>
     collectionItems.some((item) => item.bookmark_id === bookmark.id),
   );
-
-  const handleShare = () => {
-    if (selectedCollection) {
-      // In a full implementation, we would use composeCast or other sharing mechanism
-      openUrl(
-        `https://warpcast.com/~/compose?text=Check out my "${selectedCollection.name}" collection on Castmark!&embeds[]=${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`,
-      );
-    }
-  };
 
   // Show loading state
   if (loading && !selectedCollection) {
@@ -134,8 +125,8 @@ export default function CollectionDetailPage({
         </div>
         <div className="flex space-x-2">
           <button
-            onClick={handleShare}
-            className="p-2 text-gray-600 hover:text-green-600 rounded-full hover:bg-gray-100"
+            onClick={() => setShowShareModal(true)}
+            className="p-2 text-gray-600 hover:text-purple-600 rounded-full hover:bg-gray-100"
             aria-label="Share collection"
           >
             <FiShare2 size={20} />
@@ -156,7 +147,33 @@ export default function CollectionDetailPage({
         </div>
       )}
 
-      <div className="w-full max-w-3xl p-4">
+      <div className="max-w-3xl mx-auto p-4">
+        {/* Share Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-bold rounded-lg shadow hover:bg-purple-700 border-4 border-black transition-all"
+          >
+            <FiShare2 /> Share
+          </button>
+        </div>
+        {/* Share Modal Placeholder */}
+        {showShareModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full border-4 border-black shadow-lg">
+              <h2 className="text-xl font-bold mb-4">Share Collection</h2>
+              <p className="mb-4">Hybrid sharing options will go here.</p>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg border-2 border-black font-bold hover:bg-gray-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-semibold">
             Bookmarks ({collectionBookmarks.length})
