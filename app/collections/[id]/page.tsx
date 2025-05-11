@@ -11,6 +11,16 @@ import BookmarkCard from "@/components/bookmark/BookmarkCard";
 // import BookmarkForm from "~/components/bookmark/BookmarkForm";
 import CollectionForm from "@/components/collection/CollectionForm";
 import { formatDistanceToNow } from "date-fns";
+import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { useAccount, useWalletClient } from "wagmi";
+import { ethers } from "ethers";
+import type { Eip1193Provider } from "ethers";
+
+declare global {
+  interface Window {
+    ethereum?: unknown;
+  }
+}
 
 export default function CollectionDetailPage({
   params,
@@ -21,6 +31,8 @@ export default function CollectionDetailPage({
   const close = useClose();
   const openUrl = useOpenUrl();
   const { dbUser } = useUser();
+  const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
 
   const {
     selectedCollection,
@@ -40,6 +52,11 @@ export default function CollectionDetailPage({
   const [isAttesting, setIsAttesting] = useState(false);
   const [attestSuccess, setAttestSuccess] = useState<string | null>(null);
   const [attestError, setAttestError] = useState<string | null>(null);
+
+  // EAS contract address for Base mainnet/testnet
+  const EAS_CONTRACT = "0x4200000000000000000000000000000000000021";
+  // Example schema UID (replace with your deployed schema UID)
+  const COLLECTION_SCHEMA_UID = "0x..."; // TODO: Replace with your schema UID
 
   // Initialize the frame
   useEffect(() => {
@@ -184,11 +201,72 @@ export default function CollectionDetailPage({
                     setIsAttesting(true);
                     setAttestError(null);
                     setAttestSuccess(null);
-                    // EAS attestation integration will go here
-                    setTimeout(() => {
+                    try {
+                      if (!address || !walletClient)
+                        throw new Error("Connect your wallet");
+                      if (!selectedCollection)
+                        throw new Error("No collection selected");
+                      if (
+                        !COLLECTION_SCHEMA_UID ||
+                        COLLECTION_SCHEMA_UID === "0x..."
+                      )
+                        throw new Error("Schema UID not set");
+
+                      // Prepare EAS SDK
+                      const eas = new EAS(EAS_CONTRACT);
+                      // Get ethers.js signer from walletClient
+                      const provider = new ethers.BrowserProvider(
+                        window.ethereum as Eip1193Provider,
+                      );
+                      const signer = await provider.getSigner();
+                      eas.connect(signer);
+
+                      // Prepare schema encoder (example: name, description, url, owner)
+                      const encoder = new SchemaEncoder(
+                        "string name,string description,string url,address owner",
+                      );
+                      const encodedData = encoder.encodeData([
+                        {
+                          name: "name",
+                          value: selectedCollection.name,
+                          type: "string",
+                        },
+                        {
+                          name: "description",
+                          value: selectedCollection.description || "",
+                          type: "string",
+                        },
+                        {
+                          name: "url",
+                          value: `${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`,
+                          type: "string",
+                        },
+                        { name: "owner", value: address, type: "address" },
+                      ]);
+
+                      // Send attestation
+                      const tx = await eas.attest({
+                        schema: COLLECTION_SCHEMA_UID,
+                        data: {
+                          recipient: address,
+                          expirationTime: BigInt(0),
+                          revocable: true,
+                          data: encodedData,
+                        },
+                      });
+                      const attestationUID = await tx.wait();
+                      setAttestSuccess(
+                        `Attestation successful! UID: ${attestationUID}`,
+                      );
+                    } catch (err: unknown) {
+                      setAttestError(
+                        err instanceof Error
+                          ? err.message
+                          : "Attestation failed",
+                      );
+                    } finally {
                       setIsAttesting(false);
-                      setAttestSuccess("Attestation successful! (placeholder)");
-                    }, 1500);
+                    }
                   }}
                   disabled={isAttesting}
                   className={`w-full py-3 bg-green-600 text-white font-bold rounded-lg border-2 border-black shadow hover:bg-green-700 transition-all flex items-center justify-center gap-2 ${isAttesting ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -225,6 +303,15 @@ export default function CollectionDetailPage({
               {attestSuccess && (
                 <div className="mb-2 text-green-700 font-bold">
                   {attestSuccess}
+                  {/* Link to EAS Explorer */}
+                  <a
+                    href={`https://explorer.attest.sh/attestation/${attestSuccess.split("UID: ")[1]}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-2 underline text-blue-700"
+                  >
+                    View on EAS Explorer
+                  </a>
                 </div>
               )}
               {attestError && (
