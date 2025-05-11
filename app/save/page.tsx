@@ -25,6 +25,8 @@ export default function SavePage() {
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
 
   // Initialize frame
   useEffect(() => {
@@ -87,7 +89,7 @@ export default function SavePage() {
         cast_text: castData.text,
         cast_url: castData.url,
         note: note,
-        tags: [],
+        tags: tags,
         is_public: true,
       });
 
@@ -118,6 +120,24 @@ export default function SavePage() {
       );
     } else {
       setSelectedCollections([...selectedCollections, collectionId]);
+    }
+  };
+
+  const handleAddTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddTag();
     }
   };
 
@@ -206,6 +226,52 @@ export default function SavePage() {
             </label>
           ))}
         </div>
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="tags" className="block font-bold mb-2 text-lg">
+          Add tags (optional)
+        </label>
+        <div className="flex">
+          <input
+            id="tags"
+            type="text"
+            className="flex-grow px-4 py-3 border-4 border-black rounded-l-lg focus:outline-none focus:ring-4 focus:ring-purple-400"
+            placeholder="Add a tag and press Enter"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={handleTagKeyDown}
+            disabled={isSaving}
+          />
+          <button
+            type="button"
+            className="px-4 py-3 border-4 border-l-0 border-black bg-gray-100 rounded-r-lg hover:bg-gray-200 font-bold"
+            onClick={handleAddTag}
+            disabled={isSaving}
+          >
+            +
+          </button>
+        </div>
+        {tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border-2 border-black"
+              >
+                {tag}
+                <button
+                  type="button"
+                  className="ml-1.5 text-purple-600 hover:text-purple-900"
+                  onClick={() => handleRemoveTag(tag)}
+                  disabled={isSaving}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <button
