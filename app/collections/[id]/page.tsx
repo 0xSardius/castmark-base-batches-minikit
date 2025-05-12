@@ -1,4 +1,3 @@
-// app/collections/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,10 +10,6 @@ import BookmarkCard from "@/components/bookmark/BookmarkCard";
 // import BookmarkForm from "~/components/bookmark/BookmarkForm";
 import CollectionForm from "@/components/collection/CollectionForm";
 import { formatDistanceToNow } from "date-fns";
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { useAccount, useWalletClient } from "wagmi";
-import { ethers } from "ethers";
-import type { Eip1193Provider } from "ethers";
 
 declare global {
   interface Window {
@@ -31,8 +26,6 @@ export default function CollectionDetailPage({
   const close = useClose();
   const openUrl = useOpenUrl();
   const { dbUser } = useUser();
-  const { address } = useAccount();
-  const { data: walletClient } = useWalletClient();
 
   const {
     selectedCollection,
@@ -49,14 +42,6 @@ export default function CollectionDetailPage({
   const [editingCollection, setEditingCollection] = useState(false);
   const [addingBookmark, setAddingBookmark] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [isAttesting, setIsAttesting] = useState(false);
-  const [attestSuccess, setAttestSuccess] = useState<string | null>(null);
-  const [attestError, setAttestError] = useState<string | null>(null);
-
-  // EAS contract address for Base mainnet/testnet
-  const EAS_CONTRACT = "0x4200000000000000000000000000000000000021";
-  // Example schema UID (replace with your deployed schema UID)
-  const COLLECTION_SCHEMA_UID = "0x..."; // TODO: Replace with your schema UID
 
   // Initialize the frame
   useEffect(() => {
@@ -192,131 +177,11 @@ export default function CollectionDetailPage({
                     const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(`${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`)}`;
                     openUrl(shareUrl);
                   }}
-                  className="w-full py-3 bg-purple-600 text-white font-bold rounded-lg border-2 border-black shadow hover:bg-purple-700 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-purple-600 text-white font-bold rounded-lg border-2 border-black shadow hover:bg-purple-700 transition-all text-lg flex items-center justify-center gap-2"
                 >
-                  <FiShare2 /> Share to Farcaster
-                </button>
-                <button
-                  onClick={async () => {
-                    setIsAttesting(true);
-                    setAttestError(null);
-                    setAttestSuccess(null);
-                    try {
-                      if (!address || !walletClient)
-                        throw new Error("Connect your wallet");
-                      if (!selectedCollection)
-                        throw new Error("No collection selected");
-                      if (
-                        !COLLECTION_SCHEMA_UID ||
-                        COLLECTION_SCHEMA_UID === "0x..."
-                      )
-                        throw new Error("Schema UID not set");
-
-                      // Prepare EAS SDK
-                      const eas = new EAS(EAS_CONTRACT);
-                      // Get ethers.js signer from walletClient
-                      const provider = new ethers.BrowserProvider(
-                        window.ethereum as Eip1193Provider,
-                      );
-                      const signer = await provider.getSigner();
-                      eas.connect(signer);
-
-                      // Prepare schema encoder (example: name, description, url, owner)
-                      const encoder = new SchemaEncoder(
-                        "string name,string description,string url,address owner",
-                      );
-                      const encodedData = encoder.encodeData([
-                        {
-                          name: "name",
-                          value: selectedCollection.name,
-                          type: "string",
-                        },
-                        {
-                          name: "description",
-                          value: selectedCollection.description || "",
-                          type: "string",
-                        },
-                        {
-                          name: "url",
-                          value: `${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`,
-                          type: "string",
-                        },
-                        { name: "owner", value: address, type: "address" },
-                      ]);
-
-                      // Send attestation
-                      const tx = await eas.attest({
-                        schema: COLLECTION_SCHEMA_UID,
-                        data: {
-                          recipient: address,
-                          expirationTime: BigInt(0),
-                          revocable: true,
-                          data: encodedData,
-                        },
-                      });
-                      const attestationUID = await tx.wait();
-                      setAttestSuccess(
-                        `Attestation successful! UID: ${attestationUID}`,
-                      );
-                    } catch (err: unknown) {
-                      setAttestError(
-                        err instanceof Error
-                          ? err.message
-                          : "Attestation failed",
-                      );
-                    } finally {
-                      setIsAttesting(false);
-                    }
-                  }}
-                  disabled={isAttesting}
-                  className={`w-full py-3 bg-green-600 text-white font-bold rounded-lg border-2 border-black shadow hover:bg-green-700 transition-all flex items-center justify-center gap-2 ${isAttesting ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  {isAttesting ? (
-                    <>
-                      <svg
-                        className="animate-spin h-5 w-5 mr-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Attesting...
-                    </>
-                  ) : (
-                    <>🔗 Make Public Onchain</>
-                  )}
+                  <FiShare2 size={24} /> Share to Farcaster
                 </button>
               </div>
-              {attestSuccess && (
-                <div className="mb-2 text-green-700 font-bold">
-                  {attestSuccess}
-                  {/* Link to EAS Explorer */}
-                  <a
-                    href={`https://explorer.attest.sh/attestation/${attestSuccess.split("UID: ")[1]}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-2 underline text-blue-700"
-                  >
-                    View on EAS Explorer
-                  </a>
-                </div>
-              )}
-              {attestError && (
-                <div className="mb-2 text-red-700 font-bold">{attestError}</div>
-              )}
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setShowShareModal(false)}
