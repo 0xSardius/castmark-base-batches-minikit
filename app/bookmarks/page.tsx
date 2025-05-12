@@ -19,23 +19,19 @@ export default function BookmarksPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center">
-      <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b border-gray-200">
+      <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b-4 border-black bg-white">
         <div className="flex items-center">
           <button
             onClick={() => window.history.back()}
-            className="mr-4 p-2 rounded-full hover:bg-gray-100"
+            className="mr-4 p-2 rounded-lg border-4 border-black bg-white hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] transition-all text-xl"
             aria-label="Go back"
           >
-            <FiArrowLeft size={20} />
+            <FiArrowLeft size={24} />
           </button>
-          <h1 className="text-xl font-bold">Your Bookmarks</h1>
+          <h1 className="text-base font-black tracking-wide border-4 border-black rounded-lg px-3 py-1 bg-white text-center select-none">
+            Your Bookmarks
+          </h1>
         </div>
-        <a
-          href="/collections"
-          className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
-        >
-          Collections
-        </a>
       </header>
 
       <div className="w-full max-w-3xl">

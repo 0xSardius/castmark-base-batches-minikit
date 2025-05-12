@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useUser } from "@/context/UserContext";
 import { Identity, Avatar, Name } from "@coinbase/onchainkit/identity";
-import { FiFolder } from "react-icons/fi";
+import { FiFolder, FiTag } from "react-icons/fi";
 import Loading from "@/components/ui/loading";
 import BookmarkCard from "@/components/bookmark/BookmarkCard";
 
@@ -11,6 +11,7 @@ export default function BookmarksList() {
   const { dbUser, loading: userLoading } = useUser();
   const { bookmarks, loading, fetchBookmarks } = useBookmarkStore();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [showTagFilter, setShowTagFilter] = useState(false);
 
   useEffect(() => {
     if (dbUser?.id) {
@@ -37,9 +38,12 @@ export default function BookmarksList() {
   return (
     <div className="p-4">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2 sm:gap-4 w-full">
-        <h1 className="text-2xl font-black uppercase tracking-wide border-4 border-black rounded-lg px-4 py-2 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full sm:w-auto text-center">
-          Your Bookmarks
-        </h1>
+        <button
+          onClick={() => setShowTagFilter((prev) => !prev)}
+          className="flex items-center bg-yellow-300 text-black px-4 py-2 border-4 border-black rounded-lg font-black shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] active:shadow-none transition-all gap-2 w-full sm:w-auto justify-center select-none"
+        >
+          <FiTag size={20} /> Sort by Tag
+        </button>
         <a
           href="/collections"
           className="flex items-center text-base bg-purple-400 text-white px-5 py-2 border-4 border-black rounded-lg font-black uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none active:shadow-none transition-all gap-2 w-full sm:w-auto justify-center"
@@ -48,7 +52,7 @@ export default function BookmarksList() {
         </a>
       </div>
 
-      {allTags.length > 0 && (
+      {showTagFilter && allTags.length > 0 && (
         <div className="mb-4 overflow-x-auto pb-2">
           <div className="flex space-x-2">
             <button
