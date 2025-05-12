@@ -5,7 +5,6 @@ import { useUser } from "@/context/UserContext";
 import { Collection } from "@/lib/supabase";
 import CollectionCard from "./CollectionCard";
 import CollectionForm from "./CollectionForm";
-import { FiPlusCircle } from "react-icons/fi";
 
 export default function CollectionsList() {
   const { dbUser, isAuthenticated, showAuthPrompt } = useUser();
@@ -46,8 +45,8 @@ export default function CollectionsList() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 text-center">
-        <h2 className="text-xl font-bold mb-2">
+      <div className="flex flex-col items-center justify-center p-6 text-center border-4 border-black rounded-lg bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <h2 className="text-xl font-black mb-2">
           Sign in to view your collections
         </h2>
         <p className="text-gray-600 mb-4">
@@ -56,7 +55,7 @@ export default function CollectionsList() {
         </p>
         <button
           onClick={() => showAuthPrompt()}
-          className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
+          className="px-6 py-3 bg-purple-400 text-white border-4 border-black rounded-lg font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
         >
           Sign in with Farcaster
         </button>
@@ -67,7 +66,7 @@ export default function CollectionsList() {
   if (loading && collections.length === 0) {
     return (
       <div className="flex justify-center p-6">
-        <div className="animate-pulse text-gray-600">
+        <div className="animate-pulse text-gray-600 font-bold">
           Loading collections...
         </div>
       </div>
@@ -77,38 +76,27 @@ export default function CollectionsList() {
   if (error) {
     return (
       <div className="flex justify-center p-6">
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-500 font-bold">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Your Collections</h1>
-        <button
-          onClick={handleAddCollection}
-          className="flex items-center px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
-        >
-          <FiPlusCircle size={18} className="mr-2" />
-          New Collection
-        </button>
-      </div>
-
+    <div className="space-y-4">
       {collections.length === 0 ? (
-        <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-600 mb-4">
+        <div className="text-center p-8 border-4 border-dashed border-black rounded-lg bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-gray-600 mb-4 font-bold">
             You haven&apos;t created any collections yet.
           </p>
           <button
             onClick={handleAddCollection}
-            className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
+            className="px-6 py-3 bg-purple-400 text-white border-4 border-black rounded-lg font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
           >
             Create your first collection
           </button>
         </div>
       ) : (
-        <div>
+        <div className="space-y-4">
           {collections.map((collection) => (
             <CollectionCard
               key={collection.id}

@@ -37,15 +37,15 @@ export default function CollectionCard({
 
   return (
     <div
-      className="border border-gray-200 rounded-lg p-4 mb-4 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="border-4 border-black rounded-lg p-4 mb-4 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] cursor-pointer"
       onClick={() => onSelect && onSelect(collection)}
     >
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="text-lg font-medium hover:text-purple-600 transition-colors">
+          <h3 className="text-lg font-black hover:text-purple-600 transition-colors">
             {collection.name}
           </h3>
-          <div className="text-sm text-gray-500 mt-1">
+          <div className="text-sm text-gray-500 mt-1 font-bold">
             Created{" "}
             {formatDistanceToNow(new Date(collection.created_at), {
               addSuffix: true,
@@ -55,7 +55,7 @@ export default function CollectionCard({
         <div className="flex space-x-2">
           <button
             onClick={handleShare}
-            className="p-2 text-gray-500 hover:text-green-600 transition-colors"
+            className="p-2 text-gray-500 hover:text-green-600 transition-colors border-2 border-black rounded-lg hover:bg-green-100 active:translate-x-[2px] active:translate-y-[2px]"
             aria-label="Share collection"
           >
             <FiShare2 size={18} />
@@ -65,7 +65,7 @@ export default function CollectionCard({
               e.stopPropagation();
               if (onEdit) onEdit(collection);
             }}
-            className="p-2 text-gray-500 hover:text-purple-600 transition-colors"
+            className="p-2 text-gray-500 hover:text-purple-600 transition-colors border-2 border-black rounded-lg hover:bg-purple-100 active:translate-x-[2px] active:translate-y-[2px]"
             aria-label="Edit collection"
           >
             <FiEdit size={18} />
@@ -75,7 +75,7 @@ export default function CollectionCard({
               e.stopPropagation();
               handleDelete();
             }}
-            className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+            className="p-2 text-gray-500 hover:text-red-600 transition-colors border-2 border-black rounded-lg hover:bg-red-100 active:translate-x-[2px] active:translate-y-[2px]"
             aria-label="Delete collection"
           >
             <FiTrash2 size={18} />
@@ -84,18 +84,20 @@ export default function CollectionCard({
       </div>
 
       {collection.description && (
-        <div className="mt-2 text-gray-700">{collection.description}</div>
+        <div className="mt-2 text-gray-700 font-medium">
+          {collection.description}
+        </div>
       )}
 
-      <div className="mt-3 flex items-center space-x-3">
+      <div className="mt-3 flex gap-2">
         {!collection.is_public && (
-          <span className="inline-flex items-center text-xs text-gray-600">
+          <span className="inline-flex items-center text-xs font-bold text-gray-600 border-2 border-black rounded-lg px-2 py-1">
             <FiLock size={12} className="mr-1" />
             Private
           </span>
         )}
         {collection.is_collaborative && (
-          <span className="inline-flex items-center text-xs text-gray-600">
+          <span className="inline-flex items-center text-xs font-bold text-gray-600 border-2 border-black rounded-lg px-2 py-1">
             <FiUsers size={12} className="mr-1" />
             Collaborative
           </span>
