@@ -36,13 +36,15 @@ export default function BookmarksList() {
 
   return (
     <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Your Bookmarks</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2 sm:gap-4 w-full">
+        <h1 className="text-2xl font-black uppercase tracking-wide border-4 border-black rounded-lg px-4 py-2 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full sm:w-auto text-center">
+          Your Bookmarks
+        </h1>
         <a
           href="/collections"
-          className="flex items-center text-sm bg-purple-100 text-purple-700 px-3 py-1.5 rounded-md hover:bg-purple-200"
+          className="flex items-center text-base bg-purple-400 text-white px-5 py-2 border-4 border-black rounded-lg font-black uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none active:shadow-none transition-all gap-2 w-full sm:w-auto justify-center"
         >
-          <FiFolder size={16} className="mr-1" /> Collections
+          <FiFolder size={20} /> Collections
         </a>
       </div>
 
@@ -52,8 +54,8 @@ export default function BookmarksList() {
             <button
               className={`whitespace-nowrap px-3 py-1 rounded-full text-sm ${
                 selectedTag === null
-                  ? "bg-purple-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-purple-400 text-black border-4 border-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                  : "bg-white text-black border-4 border-black font-bold hover:bg-purple-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
               }`}
               onClick={() => setSelectedTag(null)}
             >
@@ -62,10 +64,10 @@ export default function BookmarksList() {
             {allTags.map((tag) => (
               <button
                 key={tag}
-                className={`whitespace-nowrap px-3 py-1 rounded-full text-sm ${
+                className={`whitespace-nowrap px-3 py-1 rounded-full text-sm border-4 border-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
                   selectedTag === tag
-                    ? "bg-purple-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-purple-400 text-black"
+                    : "bg-white text-black hover:bg-purple-100"
                 }`}
                 onClick={() => setSelectedTag(tag)}
               >
@@ -77,7 +79,7 @@ export default function BookmarksList() {
       )}
 
       {filteredBookmarks.length === 0 ? (
-        <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg">
+        <div className="text-center p-8 border-4 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white">
           <p className="text-gray-600 mb-2">
             You don&apos;t have any bookmarks yet
           </p>
@@ -86,13 +88,13 @@ export default function BookmarksList() {
           </p>
           <a
             href="/"
-            className="inline-block px-4 py-2 bg-purple-600 text-white rounded-lg"
+            className="inline-block px-6 py-3 bg-purple-400 text-black border-4 border-black rounded-lg font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none active:shadow-none transition-all"
           >
             Discover Casts
           </a>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6 w-full max-w-md mx-auto">
           {filteredBookmarks.map((bookmark) => {
             // Generate a proxy address for OnchainKit Identity from FID
             const authorProxyAddress =
@@ -101,7 +103,7 @@ export default function BookmarksList() {
             return (
               <div
                 key={bookmark.id}
-                className="border border-gray-200 rounded-lg p-4 bg-white"
+                className="border-4 border-black rounded-lg p-6 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full"
               >
                 <div className="mb-2">
                   <Identity address={authorProxyAddress}>
@@ -120,7 +122,7 @@ export default function BookmarksList() {
                     {bookmark.tags.map((tag: string) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border-2 border-black"
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-300 text-black border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                       >
                         {tag}
                       </span>
