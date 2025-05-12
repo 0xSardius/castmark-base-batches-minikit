@@ -35,8 +35,12 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center pb-16">
       <header className="w-full max-w-3xl flex flex-col sm:flex-row justify-between items-center p-4 border-b-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white gap-4 sm:gap-0">
         <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto gap-2 sm:gap-0">
-          <h1 className="text-2xl font-bold text-purple-600">Castmark</h1>
-          <p className="text-sm text-gray-500 ml-0 sm:ml-2">
+          <div className="flex items-center justify-center px-4 py-2 bg-white border-4 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <h1 className="text-2xl font-black uppercase text-purple-600 tracking-wide">
+              Castmark
+            </h1>
+          </div>
+          <p className="text-sm text-gray-500 ml-0 sm:ml-2 font-bold">
             Save what matters
           </p>
         </div>
