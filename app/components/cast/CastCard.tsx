@@ -7,6 +7,7 @@ import {
   FiExternalLink,
 } from "react-icons/fi";
 import BookmarkButton from "../bookmark/BookmarkButton";
+import Image from "next/image";
 
 interface CastCardProps {
   cast: {
@@ -32,9 +33,11 @@ export default function CastCard({ cast }: CastCardProps) {
   return (
     <div className="border border-gray-200 rounded-lg p-4 mb-4 bg-white">
       <div className="flex">
-        <img
+        <Image
           src={cast.authorPfp}
           alt={cast.authorDisplayName}
+          width={40}
+          height={40}
           className="h-10 w-10 rounded-full mr-3"
         />
         <div className="flex-1">

@@ -1,6 +1,7 @@
 // components/cast/SampleCast.tsx
 import { formatDistanceToNow } from "date-fns";
 import BookmarkButton from "@/components/bookmark/BookmarkButton";
+import Image from "next/image";
 
 export default function SampleCast() {
   // Sample cast data for testing
@@ -18,9 +19,11 @@ export default function SampleCast() {
   return (
     <div className="border border-gray-200 rounded-lg p-4 mb-4 bg-white">
       <div className="flex">
-        <img
+        <Image
           src={castData.authorPfp}
           alt={castData.authorDisplayName}
+          width={40}
+          height={40}
           className="h-10 w-10 rounded-full mr-3"
         />
         <div className="flex-1">
