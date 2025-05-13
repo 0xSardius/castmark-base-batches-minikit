@@ -8,17 +8,17 @@
     "version": "next",
     "name": "Castmark",
     "description": "Bookmark, tag, and organize your favorite Farcaster casts",
-    "iconUrl": "https://castmark.vercel.app/og.png",
-    "splashImageUrl": "https://castmark.vercel.app/og.png",
+    "iconUrl": "https://castmark-base-batches-minikit.vercel.app/og.png",
+    "splashImageUrl": "https://castmark-base-batches-minikit.vercel.app/og.png",
     "splashBackgroundColor": "#ffffff",
-    "homeUrl": "https://castmark.vercel.app"
+    "homeUrl": "https://castmark-base-batches-minikit.vercel.app/"
   },
   "name": "Castmark",
   "description": "Bookmark, tag, and organize your favorite Farcaster casts",
-  "image": "https://castmark.vercel.app/og.png",
+  "image": "https://castmark-base-batches-minikit.vercel.app/og.png",
   "action": {
     "type": "post",
-    "post_url": "https://castmark.vercel.app/api/farcaster"
+    "post_url": "https://castmark-base-batches-minikit.vercel.app/api/farcaster"
   },
   "input": {
     "text": "Save this cast to Castmark"

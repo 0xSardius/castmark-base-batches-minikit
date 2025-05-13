@@ -24,6 +24,15 @@ export default function Home() {
     }
   }, [isFrameReady, setFrameReady]);
 
+  // Show loading state until frame is ready
+  if (!isFrameReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   const handleAddFrame = async () => {
     const result = await addFrame();
     if (result) {
