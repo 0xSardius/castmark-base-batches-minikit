@@ -17,8 +17,8 @@
   "description": "Bookmark, tag, and organize your favorite Farcaster casts",
   "image": "https://castmark.vercel.app/og.png",
   "action": {
-    "type": "post_redirect",
-    "post_url": "https://castmark.vercel.app/save"
+    "type": "post",
+    "post_url": "https://castmark.vercel.app/api/farcaster"
   },
   "input": {
     "text": "Save this cast to Castmark"
@@ -26,7 +26,7 @@
   "buttons": [
     {
       "label": "Save to Castmark",
-      "action": "post_redirect"
+      "action": "post"
     }
   ]
 }
