@@ -6,12 +6,15 @@ import { Identity, Avatar, Name } from "@coinbase/onchainkit/identity";
 import { FiFolder, FiTag } from "react-icons/fi";
 import Loading from "@/components/ui/loading";
 import BookmarkCard from "@/components/bookmark/BookmarkCard";
+import BookmarkForm from "./BookmarkForm";
+import { Bookmark } from "@/lib/supabase";
 
 export default function BookmarksList() {
   const { dbUser, loading: userLoading } = useUser();
   const { bookmarks, loading, fetchBookmarks } = useBookmarkStore();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [showTagFilter, setShowTagFilter] = useState(false);
+  const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
 
   useEffect(() => {
     if (dbUser?.id) {
@@ -118,7 +121,7 @@ export default function BookmarksList() {
                   </Identity>
                 </div>
 
-                <BookmarkCard bookmark={bookmark} />
+                <BookmarkCard bookmark={bookmark} onEdit={setEditingBookmark} />
 
                 {/* Tag display */}
                 {bookmark.tags && bookmark.tags.length > 0 && (
@@ -137,6 +140,17 @@ export default function BookmarksList() {
             );
           })}
         </div>
+      )}
+
+      {editingBookmark && (
+        <BookmarkForm
+          existingBookmark={editingBookmark}
+          onClose={() => setEditingBookmark(null)}
+          onSuccess={() => {
+            setEditingBookmark(null);
+            fetchBookmarks(dbUser?.id || "");
+          }}
+        />
       )}
     </div>
   );

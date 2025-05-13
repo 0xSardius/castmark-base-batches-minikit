@@ -109,19 +109,21 @@ export default function CollectionDetailPage({
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center">
-      <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b border-gray-200">
+    <main className="flex min-h-screen flex-col items-center bg-gray-50">
+      <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b-4 border-black bg-white">
         <div className="flex items-center">
           <button
             onClick={() => (window.location.href = "/collections")}
-            className="mr-4 p-2 rounded-full hover:bg-gray-100"
+            className="mr-4 p-2 rounded-lg border-4 border-black bg-white hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] transition-all text-xl"
             aria-label="Go back"
           >
-            <FiArrowLeft size={20} />
+            <FiArrowLeft size={24} />
           </button>
           <div>
-            <h1 className="text-xl font-bold">{selectedCollection.name}</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-lg font-black tracking-wide border-4 border-black rounded-lg px-3 py-1 bg-white shadow-[4px_4px_0_0_#000] text-center select-none">
+              {selectedCollection.name}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
               Created{" "}
               {formatDistanceToNow(new Date(selectedCollection.created_at), {
                 addSuffix: true,
@@ -132,14 +134,14 @@ export default function CollectionDetailPage({
         <div className="flex space-x-2">
           <button
             onClick={() => setShowShareModal(true)}
-            className="p-2 text-gray-600 hover:text-purple-600 rounded-full hover:bg-gray-100"
+            className="p-2 border-4 border-black rounded-lg text-gray-600 hover:text-purple-600 bg-white shadow-[2px_2px_0_0_#000] hover:shadow-none active:shadow-none transition-all"
             aria-label="Share collection"
           >
             <FiShare2 size={20} />
           </button>
           <button
             onClick={() => setEditingCollection(true)}
-            className="p-2 text-gray-600 hover:text-purple-600 rounded-full hover:bg-gray-100"
+            className="p-2 border-4 border-black rounded-lg text-gray-600 hover:text-purple-600 bg-white shadow-[2px_2px_0_0_#000] hover:shadow-none active:shadow-none transition-all"
             aria-label="Edit collection"
           >
             <FiEdit size={20} />
@@ -148,94 +150,91 @@ export default function CollectionDetailPage({
       </header>
 
       {selectedCollection.description && (
-        <div className="w-full max-w-3xl p-4 bg-gray-50 border-b border-gray-200">
-          <p className="text-gray-700">{selectedCollection.description}</p>
+        <div className="w-full max-w-3xl p-4 bg-gray-50 border-b-4 border-black">
+          <p className="text-gray-700 font-medium">
+            {selectedCollection.description}
+          </p>
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto p-4">
-        {/* Share Button */}
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={() => setShowShareModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-bold rounded-lg shadow hover:bg-purple-700 border-4 border-black transition-all"
-          >
-            <FiShare2 /> Share
-          </button>
-        </div>
-        {/* Share Modal Placeholder */}
-        {showShareModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full border-4 border-black shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Share Collection</h2>
-              <p className="mb-4">
-                Choose how you want to share your collection:
-              </p>
-              <div className="flex flex-col gap-4 mb-4">
-                <button
-                  onClick={() => {
-                    const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(`${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`)}`;
-                    openUrl(shareUrl);
-                  }}
-                  className="w-full py-4 bg-purple-600 text-white font-bold rounded-lg border-2 border-black shadow hover:bg-purple-700 transition-all text-lg flex items-center justify-center gap-2"
-                >
-                  <FiShare2 size={24} /> Share to Farcaster
-                </button>
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowShareModal(false)}
-                  className="px-4 py-2 bg-gray-200 rounded-lg border-2 border-black font-bold hover:bg-gray-300"
-                >
-                  Close
-                </button>
-              </div>
+      {/* Share Button */}
+      <div className="flex justify-end mb-4 w-full max-w-3xl">
+        <button
+          onClick={() => setShowShareModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-purple-400 text-black font-black rounded-lg border-4 border-black shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] active:shadow-none transition-all text-lg"
+        >
+          <FiShare2 /> Share
+        </button>
+      </div>
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full border-4 border-black shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-xl font-black mb-4">Share Collection</h2>
+            <p className="mb-4">
+              Choose how you want to share your collection:
+            </p>
+            <div className="flex flex-col gap-4 mb-4">
+              <button
+                onClick={() => {
+                  const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(`${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`)}`;
+                  openUrl(shareUrl);
+                }}
+                className="w-full py-4 bg-purple-400 text-black font-black rounded-lg border-4 border-black shadow-[2px_2px_0_0_#000] hover:shadow-none transition-all text-lg flex items-center justify-center gap-2"
+              >
+                <FiShare2 size={24} /> Share to Farcaster
+              </button>
             </div>
-          </div>
-        )}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold">
-            Bookmarks ({collectionBookmarks.length})
-          </h2>
-          <button
-            onClick={() => setAddingBookmark(true)}
-            className="flex items-center px-3 py-1 text-sm bg-purple-600 rounded-md text-white hover:bg-purple-700"
-          >
-            <FiPlus size={16} className="mr-1" />
-            Add Bookmark
-          </button>
-        </div>
-
-        {collectionBookmarks.length === 0 ? (
-          <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg">
-            <p className="text-gray-600 mb-4">This collection is empty.</p>
             <button
-              onClick={() => setAddingBookmark(true)}
-              className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
+              onClick={() => setShowShareModal(false)}
+              className="px-4 py-2 bg-gray-200 rounded-lg border-4 border-black font-bold hover:bg-gray-300"
             >
-              Add your first bookmark
+              Close
             </button>
           </div>
-        ) : (
-          <div>
-            {collectionBookmarks.map((bookmark) => (
-              <BookmarkCard key={bookmark.id} bookmark={bookmark} />
-            ))}
-          </div>
-        )}
+        </div>
+      )}
+      <div className="flex justify-between items-center mb-6 w-full max-w-3xl">
+        <h2 className="text-lg font-black tracking-wide border-4 border-black rounded-lg px-3 py-1 bg-white shadow-[2px_2px_0_0_#000] select-none">
+          Bookmarks ({collectionBookmarks.length})
+        </h2>
+        <button
+          onClick={() => setAddingBookmark(true)}
+          className="flex items-center px-4 py-2 text-sm bg-purple-400 rounded-lg text-black border-4 border-black font-black shadow-[2px_2px_0_0_#000] hover:shadow-none active:shadow-none transition-all gap-2"
+        >
+          <FiPlus size={16} className="mr-1" /> Add Bookmark
+        </button>
       </div>
+
+      {collectionBookmarks.length === 0 ? (
+        <div className="text-center p-8 border-4 border-dashed border-black rounded-lg bg-white shadow-[4px_4px_0_0_#000]">
+          <p className="text-gray-600 mb-4">This collection is empty.</p>
+          <button
+            onClick={() => setAddingBookmark(true)}
+            className="px-6 py-3 bg-purple-400 text-black border-4 border-black rounded-lg font-black uppercase shadow-[2px_2px_0_0_#000] hover:shadow-none active:shadow-none transition-all"
+          >
+            Add your first bookmark
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4 w-full max-w-md mx-auto">
+          {collectionBookmarks.map((bookmark) => (
+            <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+          ))}
+        </div>
+      )}
 
       <div className="fixed bottom-4 right-4">
         <button
           onClick={close}
-          className="px-4 py-2 bg-gray-200 rounded-full text-gray-700 font-medium shadow-lg hover:bg-gray-300 transition-colors"
+          className="px-4 py-2 bg-white border-4 border-black rounded-lg text-black font-bold shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
         >
           Close
         </button>
       </div>
 
       {/* Edit Collection Modal */}
-      {editingCollection && selectedCollection && (
+      {editingCollection && (
         <CollectionForm
           existingCollection={selectedCollection}
           onClose={() => setEditingCollection(false)}
