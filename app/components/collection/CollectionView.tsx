@@ -1,8 +1,8 @@
 // components/collection/CollectionView.tsx
 import { useState } from "react";
-import { useComposeCast } from "@coinbase/onchainkit/minikit";
+import { useOpenUrl } from "@coinbase/onchainkit/minikit";
 import { Collection, Bookmark } from "@/lib/supabase";
-import { FiShare2, FiEdit, FiBookmark } from "react-icons/fi";
+import { FiShare2, FiEdit, FiBookmark, FiCheck } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
 import SimpleAttestation from "@/components/onchain/SimpleAttestation";
 
@@ -17,17 +17,18 @@ export default function CollectionView({
   bookmarks,
   onEdit,
 }: CollectionViewProps) {
-  const composeCast = useComposeCast();
+  const openUrl = useOpenUrl();
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
 
   const handleShare = async () => {
     setIsSharing(true);
     try {
-      await composeCast({
-        text: `Check out my "${collection.name}" collection on Castmark!${collection.description ? "\n\n" + collection.description : ""}`,
-        embeds: [`${process.env.NEXT_PUBLIC_URL}/collections/${collection.id}`],
-      });
+      const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+        `Check out my "${collection.name}" collection on Castmark!${collection.description ? "\n\n" + collection.description : ""}`,
+      )}&embeds[]=${encodeURIComponent(`${process.env.NEXT_PUBLIC_URL}/collections/${collection.id}`)}`;
+
+      await openUrl(shareUrl);
       setShareSuccess(true);
       setTimeout(() => setShareSuccess(false), 2000);
     } catch (error) {

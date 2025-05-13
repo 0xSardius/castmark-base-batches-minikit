@@ -1,9 +1,8 @@
 // components/bookmark/AddToCollectionModal.tsx
 import { useState, useEffect } from "react";
-import { FiX, FiPlus } from "react-icons/fi";
+import { FiX } from "react-icons/fi";
 import { useCollectionStore } from "@/stores/collectionStore";
 import { useUser } from "@/context/UserContext";
-import CollectionForm from "@/components/collection/CollectionForm";
 
 interface AddToCollectionModalProps {
   bookmarkId: string;
@@ -19,7 +18,6 @@ export default function AddToCollectionModal({
     useCollectionStore();
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
     if (dbUser?.id) {
