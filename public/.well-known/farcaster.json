@@ -1,0 +1,32 @@
+{
+  "accountAssociation": {
+    "header": "BASE64_HEADER_STRING",
+    "payload": "BASE64_PAYLOAD_STRING",
+    "signature": "BASE64_SIGNATURE_STRING"
+  },
+  "frame": {
+    "version": "next",
+    "name": "Castmark",
+    "description": "Bookmark, tag, and organize your favorite Farcaster casts",
+    "iconUrl": "https://castmark.vercel.app/og.png",
+    "splashImageUrl": "https://castmark.vercel.app/og.png",
+    "splashBackgroundColor": "#ffffff",
+    "homeUrl": "https://castmark.vercel.app"
+  },
+  "name": "Castmark",
+  "description": "Bookmark, tag, and organize your favorite Farcaster casts",
+  "image": "https://castmark.vercel.app/og.png",
+  "action": {
+    "type": "post_redirect",
+    "post_url": "https://castmark.vercel.app/save"
+  },
+  "input": {
+    "text": "Save this cast to Castmark"
+  },
+  "buttons": [
+    {
+      "label": "Save to Castmark",
+      "action": "post_redirect"
+    }
+  ]
+}

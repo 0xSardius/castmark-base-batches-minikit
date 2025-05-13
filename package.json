@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@coinbase/onchainkit": "latest",
+    "@coinbase/onchainkit": "^0.7.0",
     "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5",
