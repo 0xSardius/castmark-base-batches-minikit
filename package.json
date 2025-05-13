@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@coinbase/onchainkit": "latest",
-    "@coinbase/onchainkit-minikit": "^0.1.0",
     "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5",
