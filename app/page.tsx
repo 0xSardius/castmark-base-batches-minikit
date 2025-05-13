@@ -1,7 +1,7 @@
 // app/page.tsx (updated)
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   useMiniKit,
   useAddFrame,
@@ -16,19 +16,34 @@ export default function Home() {
   const { signIn, isAuthenticated } = useUser();
   const addFrame = useAddFrame();
   const openUrl = useOpenUrl();
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize the frame
+  // Initialize the frame and handle loading state
   useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
+    const initializeFrame = async () => {
+      try {
+        // Wait for any initial data loading here if needed
+        // For example: await loadInitialData();
+
+        if (!isFrameReady) {
+          setFrameReady();
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeFrame();
   }, [isFrameReady, setFrameReady]);
 
-  // Show loading state until frame is ready
-  if (!isFrameReady) {
+  // Show loading state while initializing
+  if (isLoading || !isFrameReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+          <p className="text-sm text-gray-500">Loading Castmark...</p>
+        </div>
       </div>
     );
   }
