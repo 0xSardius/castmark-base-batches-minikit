@@ -14,7 +14,7 @@ export async function GET() {
       homeUrl: URL,
       iconUrl: process.env.NEXT_PUBLIC_ICON_URL || `${URL}/og.png`,
       imageUrl: process.env.NEXT_PUBLIC_IMAGE_URL || `${URL}/og.png`,
-      buttonTitle: `Launch ${process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Castmark"}`,
+      buttonTitle: `Launch Castmark`,
       splashImageUrl:
         process.env.NEXT_PUBLIC_SPLASH_IMAGE_URL || `${URL}/og.png`,
       splashBackgroundColor: `#${process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "ffffff"}`,
