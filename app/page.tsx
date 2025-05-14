@@ -20,7 +20,11 @@ export default function Home() {
   // Initialize the frame
   useEffect(() => {
     if (!isFrameReady) {
-      setFrameReady();
+      try {
+        setFrameReady();
+      } catch (error) {
+        console.error("Failed to initialize frame:", error);
+      }
     }
   }, [isFrameReady, setFrameReady]);
 
