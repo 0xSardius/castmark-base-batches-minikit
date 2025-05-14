@@ -70,23 +70,8 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center pb-16">
-      <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <h1 className="text-xl font-black">Castmark</h1>
-        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
-          {context?.client?.added ? (
-            <span className="text-sm bg-green-200 border-4 border-black rounded-lg px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-              ✓ App saved
-            </span>
-          ) : (
-            <button
-              onClick={handleAddFrame}
-              className="px-4 py-2 text-sm border-4 border-black bg-yellow-300 rounded-lg font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none active:shadow-none transition-all"
-            >
-              Save App
-            </button>
-          )}
-          <AuthHeader />
-        </div>
+      <header className="w-full max-w-3xl flex items-center justify-center p-4 border-b-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <AuthHeader context={context} handleAddFrame={handleAddFrame} />
       </header>
 
       {!isAuthenticated ? (
