@@ -8,7 +8,7 @@ import {
 } from "@coinbase/onchainkit/minikit";
 import { useUser } from "@/context/UserContext";
 import { FiBookmark, FiFolder, FiPlus, FiShare2 } from "react-icons/fi";
-import AuthStatus from "@/components/auth/AuthStatus";
+import AuthHeader from "@/components/auth/AuthHeader";
 
 export default function Home() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
@@ -70,17 +70,8 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center pb-16">
-      <header className="w-full max-w-3xl flex flex-col sm:flex-row justify-between items-center p-4 border-b-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white gap-4 sm:gap-0">
-        <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto gap-2 sm:gap-0">
-          <div className="flex items-center justify-center px-4 py-2 bg-white border-4 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <h1 className="text-2xl font-black uppercase text-purple-600 tracking-wide">
-              Castmark
-            </h1>
-          </div>
-          <p className="text-sm text-gray-500 ml-0 sm:ml-2 font-bold">
-            Save what matters
-          </p>
-        </div>
+      <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <h1 className="text-xl font-black">Castmark</h1>
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
           {context?.client?.added ? (
             <span className="text-sm bg-green-200 border-4 border-black rounded-lg px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -94,18 +85,7 @@ export default function Home() {
               Save App
             </button>
           )}
-          {isAuthenticated ? (
-            <div className="text-sm bg-purple-200 border-4 border-black rounded-lg px-4 py-2 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-              Signed in
-            </div>
-          ) : (
-            <button
-              onClick={signIn}
-              className="px-4 py-2 text-sm border-4 border-black bg-purple-400 text-black rounded-lg font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none active:shadow-none transition-all"
-            >
-              Sign In
-            </button>
-          )}
+          <AuthHeader />
         </div>
       </header>
 
@@ -165,10 +145,6 @@ export default function Home() {
                 color="bg-purple-50 text-purple-600"
               />
             </div>
-          </div>
-
-          <div className="mt-4">
-            <AuthStatus />
           </div>
 
           <div className="mb-6">

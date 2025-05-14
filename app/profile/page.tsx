@@ -6,7 +6,7 @@ import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft } from "react-icons/fi";
 import UserProfile from "@/components/user/UserProfile";
 import { useUser } from "@/context/UserContext";
-import AuthStatus from "@/components/auth/AuthStatus";
+import AuthHeader from "@/components/auth/AuthHeader";
 
 export default function ProfilePage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
@@ -22,39 +22,37 @@ export default function ProfilePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center pb-16">
-      <header className="w-full max-w-3xl flex items-center p-4 border-b border-gray-200">
-        <button
-          onClick={() => window.history.back()}
-          className="mr-4 p-2 rounded-full hover:bg-gray-100"
-          aria-label="Go back"
-        >
-          <FiArrowLeft size={20} />
-        </button>
-        <h1 className="text-xl font-bold">Profile</h1>
+      <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => window.history.back()}
+            className="p-2 rounded-lg border-2 border-black bg-white hover:bg-gray-100 transition-colors"
+            aria-label="Go back"
+          >
+            <FiArrowLeft size={20} />
+          </button>
+          <h1 className="text-xl font-black">Profile</h1>
+        </div>
+        <AuthHeader />
       </header>
 
       <div className="w-full max-w-3xl p-4">
         {isAuthenticated ? (
           <UserProfile />
         ) : (
-          <div className="flex flex-col items-center justify-center p-6 text-center">
-            <h2 className="text-xl font-bold mb-2">Sign in required</h2>
+          <div className="flex flex-col items-center justify-center p-6 text-center border-4 border-black rounded-lg bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <h2 className="text-xl font-black mb-2">Sign in required</h2>
             <p className="text-gray-600 mb-4">
               Sign in with your Farcaster account to view your profile.
             </p>
             <button
               onClick={signIn}
-              className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
+              className="px-6 py-3 bg-purple-400 text-black border-4 border-black rounded-lg font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
             >
               Sign in with Farcaster
             </button>
           </div>
         )}
-
-        {/* Temporarily add this for testing */}
-        <div className="mt-4">
-          <AuthStatus />
-        </div>
       </div>
 
       <div className="fixed bottom-4 right-4">
