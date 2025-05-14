@@ -2,16 +2,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
+import {
+  useMiniKit,
+  useClose,
+  useAddFrame,
+} from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft } from "react-icons/fi";
 import UserProfile from "@/components/user/UserProfile";
 import { useUser } from "@/context/UserContext";
 import AuthHeader from "@/components/auth/AuthHeader";
 
 export default function ProfilePage() {
-  const { setFrameReady, isFrameReady } = useMiniKit();
+  const { setFrameReady, isFrameReady, context } = useMiniKit();
   const close = useClose();
   const { isAuthenticated, signIn } = useUser();
+  const addFrame = useAddFrame();
 
   // Initialize the frame
   useEffect(() => {
@@ -19,6 +24,13 @@ export default function ProfilePage() {
       setFrameReady();
     }
   }, [isFrameReady, setFrameReady]);
+
+  const handleAddFrame = async () => {
+    const result = await addFrame();
+    if (result) {
+      console.log("Frame added:", result.url, result.token);
+    }
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center pb-16">
@@ -33,7 +45,7 @@ export default function ProfilePage() {
           </button>
           <h1 className="text-xl font-black">Profile</h1>
         </div>
-        <AuthHeader />
+        <AuthHeader context={context} handleAddFrame={handleAddFrame} />
       </header>
 
       <div className="w-full max-w-3xl p-4">
