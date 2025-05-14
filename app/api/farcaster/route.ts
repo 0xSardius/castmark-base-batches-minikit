@@ -17,7 +17,7 @@ export async function GET() {
         imageUrl:
           process.env.NEXT_PUBLIC_IMAGE_URL ||
           `${process.env.NEXT_PUBLIC_URL}/og.png`,
-        buttonTitle: `Launch ${process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Castmark"}`,
+        buttonTitle: `Launch Castmark`,
         splashImageUrl:
           process.env.NEXT_PUBLIC_SPLASH_IMAGE_URL ||
           `${process.env.NEXT_PUBLIC_URL}/og.png`,
