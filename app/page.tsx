@@ -13,7 +13,7 @@ import AuthStatus from "@/components/auth/AuthStatus";
 
 export default function Home() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
-  const { signIn, isAuthenticated } = useUser();
+  const { signIn, isAuthenticated, loading: userLoading } = useUser();
   const addFrame = useAddFrame();
   const openUrl = useOpenUrl();
   const [isLoading, setIsLoading] = useState(true);
@@ -22,22 +22,36 @@ export default function Home() {
   useEffect(() => {
     const initializeFrame = async () => {
       try {
-        // Wait for any initial data loading here if needed
-        // For example: await loadInitialData();
+        console.log("Initializing frame...", { isFrameReady, userLoading });
 
         if (!isFrameReady) {
+          console.log("Setting frame ready...");
           setFrameReady();
         }
+      } catch (error) {
+        console.error("Error initializing frame:", error);
       } finally {
+        console.log("Frame initialization complete");
         setIsLoading(false);
       }
     };
 
     initializeFrame();
-  }, [isFrameReady, setFrameReady]);
+  }, [isFrameReady, setFrameReady, userLoading]);
+
+  // Debug logging for state changes
+  useEffect(() => {
+    console.log("State changed:", {
+      isFrameReady,
+      isLoading,
+      userLoading,
+      isAuthenticated,
+      hasContext: !!context,
+    });
+  }, [isFrameReady, isLoading, userLoading, isAuthenticated, context]);
 
   // Show loading state while initializing
-  if (isLoading || !isFrameReady) {
+  if (isLoading || !isFrameReady || userLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">

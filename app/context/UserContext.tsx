@@ -73,7 +73,6 @@ function AuthPrompt({
 
 // Create the provider component
 export function UserProvider({ children }: { children: ReactNode }) {
-  // Place hooks inside the component function
   const { context } = useMiniKit();
   const { signIn } = useAuthenticate();
 
@@ -92,6 +91,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     },
   ) => {
     try {
+      console.log("Loading/creating user...", { fid, userData });
+
       // Check if user exists in database
       const { data, error } = await supabase
         .from("users")
@@ -100,12 +101,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (error && error.code !== "PGRST116") {
-        // PGRST116 is "row not found" - we'll handle that below
         throw error;
       }
 
       if (data) {
-        // User exists, update their info
+        console.log("Existing user found:", data);
         setDbUser(data as User);
         setIsAuthenticated(true);
 
@@ -115,7 +115,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           .update({ last_login: new Date().toISOString() })
           .eq("id", data.id);
       } else if (userData) {
-        // User doesn't exist, create them
+        console.log("Creating new user...");
         const { data: newUser, error: createError } = await supabase
           .from("users")
           .insert({
@@ -128,6 +128,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           .single();
 
         if (createError) throw createError;
+        console.log("New user created:", newUser);
         setDbUser(newUser as User);
         setIsAuthenticated(true);
       }
@@ -142,6 +143,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        console.log("Checking session...");
         const sessionCookie = document.cookie
           .split("; ")
           .find((row) => row.startsWith("session="));
@@ -151,6 +153,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             decodeURIComponent(sessionCookie.split("=")[1]),
           );
           if (session.fid && new Date(session.expiresAt) > new Date()) {
+            console.log("Valid session found:", session);
             await loadOrCreateUser(session.fid, {
               username: session.username,
             });
@@ -166,6 +169,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // Get user context from MiniKit and load or create user in database
   useEffect(() => {
+    console.log("MiniKit context changed:", context);
     if (context?.user?.fid) {
       loadOrCreateUser(context.user.fid, {
         username: context.user.username,
@@ -179,11 +183,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const handleSignIn = async (): Promise<boolean> => {
     try {
+      console.log("Starting sign in process...");
       // Authenticate using MiniKit
       const result = await signIn();
 
       if (result && result.message && result.signature) {
-        // Authentication successful
+        console.log("Sign in successful:", result);
         // If we have user context from Frame SDK, use it
         if (context?.user?.fid) {
           await loadOrCreateUser(context.user.fid, {
