@@ -114,7 +114,14 @@ export default function Home() {
         <div className="w-full max-w-3xl p-4">
           <div className="mb-6">
             <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <QuickActionCard
+                title="Quick Castmark"
+                description="Save a cast URL or hash"
+                icon={FiPlus}
+                href="/quick-save"
+                color="bg-yellow-100 text-yellow-600"
+              />
               <QuickActionCard
                 title="View Bookmarks"
                 description="Access your saved casts"

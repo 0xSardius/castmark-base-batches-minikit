@@ -26,6 +26,9 @@ interface UserContextType {
 // Create the context with a default undefined value
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+// Session expiration time (30 days)
+const SESSION_EXPIRY = 30 * 24 * 60 * 60 * 1000;
+
 // AuthPrompt component used within the provider
 function AuthPrompt({
   onCancel,
@@ -80,6 +83,34 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAuthPromptVisible, setIsAuthPromptVisible] = useState(false);
+  const [authAttempted, setAuthAttempted] = useState(false);
+
+  // Function to save session to localStorage and cookies
+  const saveSession = (userData: {
+    fid: number;
+    username?: string;
+    displayName?: string;
+    pfpUrl?: string;
+  }) => {
+    const expiry = new Date(Date.now() + SESSION_EXPIRY);
+    const sessionData = {
+      fid: userData.fid,
+      username: userData.username,
+      displayName: userData.displayName,
+      pfpUrl: userData.pfpUrl,
+      expiresAt: expiry.toISOString(),
+    };
+
+    // Save to localStorage for persistent client access
+    localStorage.setItem("castmarkSession", JSON.stringify(sessionData));
+
+    // Also save to cookie for page load
+    document.cookie = `session=${encodeURIComponent(
+      JSON.stringify(sessionData),
+    )}; expires=${expiry.toUTCString()}; path=/; SameSite=Lax`;
+
+    console.log("Session saved:", sessionData);
+  };
 
   // Function to load or create a user in the database
   const loadOrCreateUser = async (
@@ -114,6 +145,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
           .from("users")
           .update({ last_login: new Date().toISOString() })
           .eq("id", data.id);
+
+        // Save session
+        if (userData) {
+          saveSession({
+            fid,
+            username: userData.username,
+            displayName: userData.displayName,
+            pfpUrl: userData.pfpUrl,
+          });
+        }
       } else if (userData) {
         console.log("Creating new user...");
         const { data: newUser, error: createError } = await supabase
@@ -131,11 +172,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
         console.log("New user created:", newUser);
         setDbUser(newUser as User);
         setIsAuthenticated(true);
+
+        // Save session
+        saveSession({
+          fid,
+          username: userData.username,
+          displayName: userData.displayName,
+          pfpUrl: userData.pfpUrl,
+        });
       }
     } catch (err) {
       console.error("Error loading user data:", err);
     } finally {
       setLoading(false);
+      setAuthAttempted(true);
     }
   };
 
@@ -143,7 +193,25 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        console.log("Checking session...");
+        console.log("Checking for saved session...");
+
+        // First try localStorage (more reliable)
+        const savedSession = localStorage.getItem("castmarkSession");
+
+        if (savedSession) {
+          const session = JSON.parse(savedSession);
+          if (session.fid && new Date(session.expiresAt) > new Date()) {
+            console.log("Valid session found in localStorage:", session);
+            await loadOrCreateUser(session.fid, {
+              username: session.username,
+              displayName: session.displayName,
+              pfpUrl: session.pfpUrl,
+            });
+            return;
+          }
+        }
+
+        // Fallback to cookie
         const sessionCookie = document.cookie
           .split("; ")
           .find((row) => row.startsWith("session="));
@@ -153,14 +221,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
             decodeURIComponent(sessionCookie.split("=")[1]),
           );
           if (session.fid && new Date(session.expiresAt) > new Date()) {
-            console.log("Valid session found:", session);
+            console.log("Valid session found in cookie:", session);
             await loadOrCreateUser(session.fid, {
               username: session.username,
+              displayName: session.displayName,
+              pfpUrl: session.pfpUrl,
             });
           }
         }
       } catch (err) {
         console.error("Error checking session:", err);
+        setLoading(false);
+        setAuthAttempted(true);
       }
     };
 
@@ -176,10 +248,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         displayName: context.user.displayName,
         pfpUrl: context.user.pfpUrl,
       });
-    } else {
-      setLoading(false);
+    } else if (!loading) {
+      setAuthAttempted(true);
     }
-  }, [context]);
+  }, [context, loading]);
 
   const handleSignIn = async (): Promise<boolean> => {
     try {
@@ -209,9 +281,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const handleSignOut = async (): Promise<void> => {
-    // Clear authentication state and session cookie
+    // Clear authentication state and session data
     setIsAuthenticated(false);
     setDbUser(null);
+
+    // Clear localStorage
+    localStorage.removeItem("castmarkSession");
+
+    // Clear cookie
     document.cookie =
       "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   };
@@ -237,7 +314,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const showAuthPrompt = async (): Promise<boolean> => {
+    // If already authenticated, return true immediately
     if (isAuthenticated) return true;
+
+    // If we're still loading, wait a bit to see if authentication completes
+    if (loading && !authAttempted) {
+      return new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (!loading && isAuthenticated) {
+            clearInterval(checkInterval);
+            resolve(true);
+          } else if (!loading || authAttempted) {
+            clearInterval(checkInterval);
+            setIsAuthPromptVisible(true);
+            resolve(false);
+          }
+        }, 200);
+      });
+    }
 
     setIsAuthPromptVisible(true);
     return false;
@@ -268,7 +362,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Create and export the hook
+// Custom hook to use the user context
 export function useUser() {
   const context = useContext(UserContext);
   if (context === undefined) {

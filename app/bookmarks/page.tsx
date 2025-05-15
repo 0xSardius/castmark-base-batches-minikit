@@ -11,6 +11,7 @@ export default function BookmarksPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const close = useClose();
   const [activeTab, setActiveTab] = useState<"list" | "import">("list");
+  const [showImported, setShowImported] = useState(false);
 
   // Initialize the frame
   useEffect(() => {
@@ -18,6 +19,15 @@ export default function BookmarksPage() {
       setFrameReady();
     }
   }, [isFrameReady, setFrameReady]);
+
+  const handleImportSuccess = () => {
+    setShowImported(true);
+    // Auto-switch to list tab after successful import
+    setTimeout(() => {
+      setActiveTab("list");
+      setShowImported(false);
+    }, 1500);
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center">
@@ -58,11 +68,17 @@ export default function BookmarksPage() {
       </header>
 
       <div className="w-full max-w-3xl p-4">
+        {showImported && (
+          <div className="mb-4 p-3 bg-green-400 text-black font-bold rounded-lg border-4 border-black shadow-[4px_4px_0_0_#000] text-center animate-pulse">
+            Cast saved successfully! Showing your bookmarks...
+          </div>
+        )}
+
         {activeTab === "list" ? (
           <BookmarkList />
         ) : (
           <div className="mt-4">
-            <CastImportForm />
+            <CastImportForm onSuccess={handleImportSuccess} />
             <p className="text-center mt-4 text-gray-500 text-sm">
               Paste a Farcaster cast URL or hash to save it to your bookmarks
             </p>

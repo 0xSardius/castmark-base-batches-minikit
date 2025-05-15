@@ -1,21 +1,97 @@
-import { useState } from "react";
-import { FiBookmark, FiLoader, FiLink } from "react-icons/fi";
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import {
+  FiBookmark,
+  FiLoader,
+  FiLink,
+  FiCheck,
+  FiClipboard,
+} from "react-icons/fi";
 import { useUser } from "@/context/UserContext";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useNotification } from "@coinbase/onchainkit/minikit";
 
-export default function CastImportForm() {
+interface CastImportFormProps {
+  onSuccess?: () => void;
+}
+
+export default function CastImportForm({ onSuccess }: CastImportFormProps) {
   const { showAuthPrompt, dbUser } = useUser();
   const { addBookmark } = useBookmarkStore();
   const sendNotification = useNotification();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [castUrl, setCastUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [pasteSuccess, setPasteSuccess] = useState(false);
+  const [extractedHash, setExtractedHash] = useState<string | null>(null);
+
+  // Auto-detect URL from clipboard on component mount
+  useEffect(() => {
+    const tryReadClipboard = async () => {
+      try {
+        // Only try to access clipboard if the user has interacted with the page
+        if (document.hasFocus() && inputRef.current) {
+          const clipboardText = await navigator.clipboard.readText();
+
+          // Check if clipboard contains what looks like a Farcaster URL or hash
+          if (isValidFarcasterInput(clipboardText) && !castUrl) {
+            // Don't auto-fill, just show the paste button
+            setPasteSuccess(true);
+          }
+        }
+      } catch {
+        // Clipboard access may be denied, that's fine
+        console.log("Clipboard access not available");
+      }
+    };
+
+    tryReadClipboard();
+  }, [castUrl]);
+
+  // Check if input looks like a valid Farcaster input
+  const isValidFarcasterInput = (input: string): boolean => {
+    if (!input) return false;
+
+    // Normalize input by trimming whitespace and removing quotes
+    input = input.trim().replace(/['"]/g, "");
+
+    // Check for hash format (with or without 0x prefix)
+    if (/^0x[a-fA-F0-9]{64}$/.test(input)) return true;
+    if (/^[a-fA-F0-9]{64}$/.test(input)) return true;
+
+    // Check for common Farcaster URLs
+    try {
+      const url = new URL(input);
+      const isKnownDomain =
+        url.hostname.includes("warpcast.com") ||
+        url.hostname.includes("farcaster.xyz") ||
+        url.hostname.includes("far.quest") ||
+        url.hostname.includes("fcast.me");
+
+      // Additional validation for pathname
+      // Allow if the URL has a path that might contain a cast
+      if (isKnownDomain) {
+        // Either the domain is known, or there's a path with potential hash
+        return url.pathname.length > 1;
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
+  };
 
   const extractCastData = async (url: string) => {
     // Handle different formats of Farcaster URLs and hashes
     let castHash = "";
+    let urlWithoutParams = url;
+
+    // Clean up the input - trim whitespace and remove quotes
+    url = url.trim().replace(/['"]/g, "");
 
     // Check if input is a direct hash
     if (/^0x[a-fA-F0-9]{64}$/.test(url)) {
@@ -25,42 +101,81 @@ export default function CastImportForm() {
     else if (url.includes("warpcast.com")) {
       try {
         const urlObj = new URL(url);
-        const pathParts = urlObj.pathname.split("/");
+
+        // Remove URL parameters that might interfere with parsing
+        urlWithoutParams = urlObj.origin + urlObj.pathname;
+
+        const pathParts = urlObj.pathname.split("/").filter(Boolean);
+
         // Extract hash from URL path
-        // Typical format: /~/0x...
+        // Handle different URL formats:
+        // - /~/0x...
+        // - /username/0x...
+        // - /cast/0x...
         for (const part of pathParts) {
-          if (part.startsWith("0x")) {
+          if (part.startsWith("0x") && /^0x[a-fA-F0-9]{64}$/.test(part)) {
             castHash = part;
             break;
           }
         }
-      } catch (_) {
-        throw new Error("Invalid Warpcast URL format");
+
+        // Additional check for newer Warpcast URL formats where hash may be a path component
+        if (!castHash && pathParts.length >= 2) {
+          const lastPart = pathParts[pathParts.length - 1];
+          // Check if it's a hash-like structure but without 0x prefix
+          if (/^[a-fA-F0-9]{64}$/.test(lastPart)) {
+            castHash = "0x" + lastPart;
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing Warpcast URL:", error);
+        throw new Error(
+          "Invalid Warpcast URL format. Please check the URL and try again.",
+        );
       }
     }
     // Handle other Farcaster clients
     else if (url.includes("farcaster.xyz") || url.includes("far.quest")) {
       try {
         const urlObj = new URL(url);
-        const pathParts = urlObj.pathname.split("/");
+
+        // Remove URL parameters
+        urlWithoutParams = urlObj.origin + urlObj.pathname;
+
+        const pathParts = urlObj.pathname.split("/").filter(Boolean);
+
         // Look for the hash in the path
         for (const part of pathParts) {
-          if (part.startsWith("0x")) {
+          if (part.startsWith("0x") && /^0x[a-fA-F0-9]{64}$/.test(part)) {
             castHash = part;
             break;
           }
         }
-      } catch (_) {
-        throw new Error("Invalid Farcaster URL format");
+
+        // Try to find hash without 0x prefix in the URL path
+        if (!castHash && pathParts.length > 0) {
+          const lastPart = pathParts[pathParts.length - 1];
+          if (/^[a-fA-F0-9]{64}$/.test(lastPart)) {
+            castHash = "0x" + lastPart;
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing Farcaster URL:", error);
+        throw new Error(
+          "Invalid Farcaster URL format. Please check the URL and try again.",
+        );
       }
     } else {
       throw new Error(
-        "Unsupported URL format. Please use a Warpcast or Farcaster URL.",
+        "Unsupported URL format. Please use a Warpcast or Farcaster URL or paste a cast hash starting with 0x.",
       );
     }
 
     if (!castHash) {
-      throw new Error("Could not extract cast hash from the URL");
+      console.error("Failed to extract hash from URL:", url);
+      throw new Error(
+        "Could not extract cast hash from the URL. Please make sure you're using a valid cast URL.",
+      );
     }
 
     // For the MVP, we'll use a simplified approach
@@ -71,16 +186,38 @@ export default function CastImportForm() {
       hash: castHash,
       authorFid: 0, // This would come from API
       text: "Cast content will appear here", // This would come from API
-      url: url,
+      url: urlWithoutParams || url,
     };
+  };
+
+  const handlePasteFromClipboard = async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      if (clipboardText) {
+        setCastUrl(clipboardText);
+        setPasteSuccess(false);
+      }
+    } catch (err) {
+      console.error("Failed to read clipboard:", err);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
+    setExtractedHash(null);
 
     if (!castUrl.trim()) {
       setError("Please enter a Farcaster cast URL or hash");
+      return;
+    }
+
+    // Validate input format before proceeding
+    if (!isValidFarcasterInput(castUrl)) {
+      setError(
+        "Invalid URL or hash format. Please enter a valid Farcaster cast URL or hash",
+      );
       return;
     }
 
@@ -94,6 +231,9 @@ export default function CastImportForm() {
     try {
       // Extract cast data from the URL
       const castData = await extractCastData(castUrl);
+
+      // Display the extracted hash
+      setExtractedHash(castData.hash);
 
       // Save the bookmark
       await addBookmark({
@@ -115,15 +255,31 @@ export default function CastImportForm() {
         });
       } catch (error) {
         console.error("Failed to send notification:", error);
+        // Continue anyway - notification is not critical
       }
 
-      // Reset form
-      setCastUrl("");
+      // Show success state
+      setSuccess(true);
+
+      // Call the onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      // Reset form after a delay
+      setTimeout(() => {
+        setCastUrl("");
+        setSuccess(false);
+      }, 2000);
     } catch (error: unknown) {
       console.error("Error importing cast:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to import cast",
-      );
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError(
+          "Failed to import cast. Please try again with a different URL or hash.",
+        );
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -147,19 +303,61 @@ export default function CastImportForm() {
             <input
               id="castUrl"
               type="text"
+              ref={inputRef}
               value={castUrl}
-              onChange={(e) => setCastUrl(e.target.value)}
+              onChange={(e) => {
+                setCastUrl(e.target.value);
+                setPasteSuccess(false);
+                setError("");
+                // Clear extracted hash when input changes
+                setExtractedHash(null);
+              }}
               placeholder="https://warpcast.com/~/0x... or 0x..."
-              className="w-full border-2 border-gray-300 pl-10 pr-3 py-2 rounded-md focus:ring-purple-500 focus:border-purple-500"
-              disabled={isProcessing}
+              className={`w-full border-2 pl-10 pr-3 py-2 rounded-md focus:ring-purple-500 focus:border-purple-500 ${
+                error
+                  ? "border-red-500"
+                  : success
+                    ? "border-green-500"
+                    : extractedHash
+                      ? "border-purple-500"
+                      : "border-gray-300"
+              }`}
+              disabled={isProcessing || success}
             />
+            {pasteSuccess && !castUrl && (
+              <button
+                type="button"
+                onClick={handlePasteFromClipboard}
+                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-700 hover:text-purple-600"
+              >
+                <FiClipboard size={18} />
+              </button>
+            )}
           </div>
           {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+          {extractedHash && !error && (
+            <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md">
+              <p className="text-xs text-gray-700">
+                <span className="font-semibold">Extracted cast hash:</span>{" "}
+                <span className="font-mono text-xs break-all">
+                  {extractedHash}
+                </span>
+              </p>
+            </div>
+          )}
+          <p className="mt-1 text-xs text-gray-500">
+            Examples:
+            <span className="font-mono mx-1">
+              https://warpcast.com/~/0x...
+            </span>{" "}
+            or
+            <span className="font-mono mx-1">0x1234...</span>
+          </p>
         </div>
 
         <button
           type="submit"
-          disabled={isProcessing || !castUrl.trim()}
+          disabled={isProcessing || !castUrl.trim() || success}
           className={`
             w-full flex items-center justify-center gap-2
             px-4 py-3
@@ -170,7 +368,7 @@ export default function CastImportForm() {
             hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
             active:shadow-none
             transition-all
-            ${isProcessing ? "bg-yellow-300" : "bg-purple-400"}
+            ${success ? "bg-green-400" : isProcessing ? "bg-yellow-300" : "bg-purple-400"}
             hover:translate-x-[2px] 
             hover:translate-y-[2px]
             active:translate-x-[4px] 
@@ -179,7 +377,12 @@ export default function CastImportForm() {
             disabled:cursor-not-allowed
           `}
         >
-          {isProcessing ? (
+          {success ? (
+            <>
+              <FiCheck />
+              <span>Saved!</span>
+            </>
+          ) : isProcessing ? (
             <>
               <FiLoader className="animate-spin" />
               <span>Processing...</span>
