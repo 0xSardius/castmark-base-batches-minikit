@@ -4,7 +4,7 @@ import { useOpenUrl } from "@coinbase/onchainkit/minikit";
 import { Collection, Bookmark } from "@/lib/supabase";
 import { FiShare2, FiEdit, FiBookmark, FiCheck } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
-import SimpleAttestation from "@/components/onchain/SimpleAttestation";
+import CollectionAttestation from "@/components/onchain/CollectionAttestation";
 
 interface CollectionViewProps {
   collection: Collection;
@@ -39,7 +39,7 @@ export default function CollectionView({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-lg border-4 border-black overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
       <div className="p-4">
         <div className="flex justify-between items-start">
           <div>
@@ -56,10 +56,10 @@ export default function CollectionView({
             <button
               onClick={handleShare}
               disabled={isSharing}
-              className={`p-2 rounded-full ${
+              className={`p-2 rounded-lg border-2 border-black ${
                 shareSuccess
-                  ? "bg-green-100 text-green-600"
-                  : "bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600"
+                  ? "bg-green-400 text-black"
+                  : "bg-purple-100 text-black hover:bg-purple-300"
               }`}
               aria-label="Share collection"
             >
@@ -69,7 +69,7 @@ export default function CollectionView({
             {onEdit && (
               <button
                 onClick={onEdit}
-                className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600"
+                className="p-2 rounded-lg border-2 border-black bg-purple-100 text-black hover:bg-purple-300"
                 aria-label="Edit collection"
               >
                 <FiEdit size={20} />
@@ -82,10 +82,10 @@ export default function CollectionView({
           <p className="mt-3 text-gray-700">{collection.description}</p>
         )}
 
-        <SimpleAttestation collection={collection} />
+        <CollectionAttestation collection={collection} />
       </div>
 
-      <div className="border-t border-gray-200 px-4 py-3 bg-gray-50">
+      <div className="border-t-4 border-black px-4 py-3 bg-gray-50">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold">
             <FiBookmark className="inline mr-2" />
@@ -94,7 +94,7 @@ export default function CollectionView({
         </div>
 
         {bookmarks.length === 0 ? (
-          <div className="text-center p-6 border border-dashed border-gray-300 rounded-lg">
+          <div className="text-center p-6 border-4 border-dashed border-gray-300 rounded-lg">
             <p className="text-gray-600">This collection is empty</p>
           </div>
         ) : (
@@ -102,7 +102,7 @@ export default function CollectionView({
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 hover:border-purple-300 transition-all"
+                className="bg-white border-2 border-black rounded-lg p-3 hover:border-purple-500 transition-all"
               >
                 <a
                   href={bookmark.cast_url || "#"}
@@ -118,7 +118,7 @@ export default function CollectionView({
                 </a>
 
                 {bookmark.note && (
-                  <div className="mt-2 text-sm text-gray-600 p-2 bg-gray-50 rounded">
+                  <div className="mt-2 text-sm text-gray-600 p-2 bg-gray-50 rounded border border-gray-200">
                     {bookmark.note}
                   </div>
                 )}
