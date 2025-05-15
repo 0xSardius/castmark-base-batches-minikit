@@ -11,10 +11,12 @@ import { FiArrowLeft } from "react-icons/fi";
 import UserProfile from "@/components/user/UserProfile";
 import { useUser } from "@/context/UserContext";
 import AuthHeader from "@/components/auth/AuthHeader";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const close = useClose();
+  const router = useRouter();
   const { isAuthenticated, signIn } = useUser();
   const addFrame = useAddFrame();
 
@@ -32,13 +34,17 @@ export default function ProfilePage() {
     }
   };
 
+  const handleGoBack = () => {
+    router.push("/");
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center pb-16">
       <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => window.history.back()}
-            className="p-2 rounded-lg border-2 border-black bg-white hover:bg-gray-100 transition-colors"
+            onClick={handleGoBack}
+            className="mr-4 p-2 rounded-lg border-4 border-black bg-white hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] transition-all text-xl"
             aria-label="Go back"
           >
             <FiArrowLeft size={20} />

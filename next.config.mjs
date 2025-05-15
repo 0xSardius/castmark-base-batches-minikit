@@ -6,6 +6,10 @@ const nextConfig = {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
+  // Configure allowed image domains
+  images: {
+    domains: ["imagedelivery.net", "res.cloudinary.com"],
+  },
 };
 
 export default nextConfig;

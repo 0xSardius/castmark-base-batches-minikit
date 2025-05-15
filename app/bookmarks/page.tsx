@@ -32,12 +32,8 @@ export default function BookmarksPage() {
   };
 
   const handleGoBack = () => {
-    // Try to go back in history, but if that's not possible, go to home page
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      router.push("/");
-    }
+    // Navigate to home page
+    router.push("/");
   };
 
   return (

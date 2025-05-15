@@ -24,7 +24,11 @@ interface NeynarCastPreview {
     fid?: number;
     username?: string;
     display_name?: string;
+    displayName?: string;
     pfp_url?: string;
+    pfp?: {
+      url?: string;
+    };
   };
   error?: string;
 }
@@ -154,12 +158,20 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
     // Clean up the input - trim whitespace and remove quotes
     url = url.trim().replace(/['"]/g, "");
 
+    // Direct input checks
     // Check if input is a direct hash (full 66-char format)
     if (/^0x[a-fA-F0-9]{64}$/.test(url)) {
+      console.log("Detected direct full hash input");
       castHash = url;
     }
     // Check if input is a Farcaster 42-char hash format
     else if (/^0x[a-fA-F0-9]{40}$/.test(url)) {
+      console.log("Detected direct 42-char hash input");
+      castHash = url;
+    }
+    // Check if input is a shorter hash format (common in Warpcast URLs)
+    else if (/^0x[a-fA-F0-9]{8,16}$/.test(url)) {
+      console.log("Detected direct shortened hash input");
       castHash = url;
     }
     // Handle warpcast.com URLs
@@ -172,45 +184,63 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
 
         const pathParts = urlObj.pathname.split("/").filter(Boolean);
 
-        console.log("Path parts:", pathParts); // Debug log
+        console.log("Warpcast URL path parts:", pathParts); // Debug log
 
-        // Extract hash from URL path - check for full hash format
-        // Handle different URL formats:
-        // - /~/0x...
-        // - /username/0x...
-        // - /cast/0x...
-        for (const part of pathParts) {
+        // Check for the modern /~/cast/HASH format first
+        if (
+          pathParts.length >= 3 &&
+          pathParts[0] === "~" &&
+          pathParts[1] === "cast"
+        ) {
+          const potentialHash = pathParts[2];
           if (
-            part.startsWith("0x") &&
-            (/^0x[a-fA-F0-9]{64}$/.test(part) ||
-              /^0x[a-fA-F0-9]{40}$/.test(part))
+            potentialHash.startsWith("0x") &&
+            /^0x[a-fA-F0-9]+$/.test(potentialHash)
           ) {
-            castHash = part;
-            break;
+            console.log("Found hash in /~/cast/ format:", potentialHash);
+            castHash = potentialHash;
+          }
+        }
+        // Check for older formats like /~/0x...
+        else if (pathParts.length >= 2 && pathParts[0] === "~") {
+          const potentialHash = pathParts[1];
+          if (
+            potentialHash.startsWith("0x") &&
+            /^0x[a-fA-F0-9]+$/.test(potentialHash)
+          ) {
+            console.log("Found hash in /~/ format:", potentialHash);
+            castHash = potentialHash;
+          }
+        }
+        // Check for format /username/0x...
+        else if (pathParts.length >= 2) {
+          // Typically the second part would be the hash
+          const potentialHash = pathParts[1];
+          if (
+            potentialHash.startsWith("0x") &&
+            /^0x[a-fA-F0-9]+$/.test(potentialHash)
+          ) {
+            console.log("Found hash in /username/ format:", potentialHash);
+            castHash = potentialHash;
           }
         }
 
-        // Handle shortened hash format: /username/0x12345678 (common in Warpcast)
-        if (!castHash && pathParts.length >= 2) {
-          // Check if the second part or last part starts with 0x (could be a shortened hash)
-          const possibleHashPart = pathParts.find(
-            (part) => part.startsWith("0x") && /^0x[a-fA-F0-9]+$/.test(part),
-          );
-
-          if (possibleHashPart) {
-            console.log("Found shortened hash:", possibleHashPart); // Debug log
-
-            // For shortened hashes, we'll use them as-is since Farcaster API works with the shortened version
-            castHash = possibleHashPart;
-            console.log("Using shortened hash:", castHash); // Debug log
+        // If no pattern matched, try to find any path part that looks like a hash
+        if (!castHash) {
+          for (const part of pathParts) {
+            if (part.startsWith("0x") && /^0x[a-fA-F0-9]+$/.test(part)) {
+              console.log("Found hash in general path scan:", part);
+              castHash = part;
+              break;
+            }
           }
         }
 
-        // Additional check for newer Warpcast URL formats where hash may be a path component
-        if (!castHash && pathParts.length >= 2) {
+        // Last resort: try to find a hash without 0x prefix
+        if (!castHash && pathParts.length > 0) {
           const lastPart = pathParts[pathParts.length - 1];
-          // Check if it's a hash-like structure but without 0x prefix
-          if (/^[a-fA-F0-9]{64}$/.test(lastPart)) {
+          if (/^[a-fA-F0-9]{40,64}$/.test(lastPart)) {
+            console.log("Found hash without 0x prefix:", lastPart);
             castHash = "0x" + lastPart;
           }
         }
@@ -222,7 +252,11 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
       }
     }
     // Handle other Farcaster clients
-    else if (url.includes("farcaster.xyz") || url.includes("far.quest")) {
+    else if (
+      url.includes("farcaster.xyz") ||
+      url.includes("far.quest") ||
+      url.includes("fcast.me")
+    ) {
       try {
         const urlObj = new URL(url);
 
@@ -230,10 +264,12 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
         urlWithoutParams = urlObj.origin + urlObj.pathname;
 
         const pathParts = urlObj.pathname.split("/").filter(Boolean);
+        console.log("Farcaster URL path parts:", pathParts); // Debug log
 
-        // Look for the hash in the path
+        // Look for the hash in the path - check all path parts
         for (const part of pathParts) {
-          if (part.startsWith("0x") && /^0x[a-fA-F0-9]{64}$/.test(part)) {
+          if (part.startsWith("0x") && /^0x[a-fA-F0-9]+$/.test(part)) {
+            console.log("Found hash in farcaster client URL:", part);
             castHash = part;
             break;
           }
@@ -242,7 +278,11 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
         // Try to find hash without 0x prefix in the URL path
         if (!castHash && pathParts.length > 0) {
           const lastPart = pathParts[pathParts.length - 1];
-          if (/^[a-fA-F0-9]{64}$/.test(lastPart)) {
+          if (/^[a-fA-F0-9]{40,64}$/.test(lastPart)) {
+            console.log(
+              "Found hash without 0x prefix in farcaster client URL:",
+              lastPart,
+            );
             castHash = "0x" + lastPart;
           }
         }
@@ -265,9 +305,7 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
       );
     }
 
-    // For the MVP, we'll use a simplified approach
-    // In a production app, you would call the Farcaster API to get cast details
-    // For now, we'll just return the hash and placeholder data
+    console.log("Successfully extracted hash:", castHash);
 
     return {
       hash: castHash,
@@ -294,15 +332,36 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
     setIsPreviewLoading(true);
     setCastPreview(null);
     try {
+      console.log("Fetching preview for hash:", hash);
       const res = await fetch(`/api/neynar-cast?hash=${hash}`);
       const data = await res.json();
-      if (data.cast) {
-        setCastPreview(data.cast);
-      } else {
-        setCastPreview({ error: data.error || "Cast not found" });
+
+      if (data.error) {
+        console.error("Preview fetch error:", data.error);
+        setCastPreview({ error: data.error });
+        return;
       }
-    } catch {
-      setCastPreview({ error: "Failed to fetch cast preview" });
+
+      // Handle Neynar SDK response format
+      if (data.cast) {
+        console.log("Preview fetch success");
+        setCastPreview(data.cast);
+      } else if (data.result && data.result.cast) {
+        // New SDK response format
+        console.log("Preview fetch success (new SDK format)");
+        setCastPreview(data.result.cast);
+      } else {
+        console.warn("No cast data in response:", data);
+        setCastPreview({ error: "No cast data found" });
+      }
+    } catch (error) {
+      console.error("Preview fetch exception:", error);
+      setCastPreview({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch cast preview",
+      });
     } finally {
       setIsPreviewLoading(false);
     }
@@ -352,30 +411,57 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
       setExtractedHash(castData.hash);
 
       // Fetch cast preview from Neynar
-      let neynarCast = null;
+      let neynarCastData = null;
       try {
+        console.log("Fetching cast data from API for hash:", castData.hash);
         const res = await fetch(`/api/neynar-cast?hash=${castData.hash}`);
-        const data = await res.json();
-        if (data.cast) {
-          neynarCast = data.cast;
-        }
-      } catch {}
 
-      // Add notice if using shortened hash
-      let isShortened = false;
-      if (castData.hash.startsWith("0x") && castData.hash.length < 66) {
-        isShortened = true;
+        if (!res.ok) {
+          throw new Error(`API response not OK: ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log("Received API response:", data);
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Handle different response formats from Neynar SDK
+        if (data.cast) {
+          console.log("Found cast in data.cast format");
+          neynarCastData = data.cast;
+        } else if (data.result && data.result.cast) {
+          console.log("Found cast in data.result.cast format");
+          neynarCastData = data.result.cast;
+        } else {
+          console.warn("No cast data in expected format:", data);
+          throw new Error("Cast data not found in the expected format");
+        }
+      } catch (error) {
+        console.error("Failed to fetch cast data from Neynar:", error);
+        if (error instanceof Error) {
+          setError(`Cannot fetch cast details: ${error.message}`);
+        } else {
+          setError("Failed to fetch cast details from Farcaster");
+        }
+        setIsProcessing(false);
+        return; // Don't continue if we can't fetch the cast
       }
 
-      // Save the bookmark with real cast data if available
+      // If we get here, we have valid cast data - save the bookmark
+      console.log("Saving bookmark with cast data:", {
+        hash: castData.hash,
+        authorFid: neynarCastData?.author?.fid,
+        text: neynarCastData?.text?.substring(0, 50) + "...",
+      });
+
       await addBookmark({
         user_id: dbUser!.id,
         cast_hash: castData.hash,
-        cast_author_fid: neynarCast?.author?.fid || castData.authorFid,
-        cast_text:
-          neynarCast?.text ||
-          (isShortened ? "Cast saved with shortened hash" : castData.text),
-        cast_url: castData.url,
+        cast_author_fid: neynarCastData?.author?.fid || 0,
+        cast_text: neynarCastData?.text || "Cast content",
+        cast_url: neynarCastData?.url || castData.url,
         is_public: true,
         note: "",
         tags: [],
@@ -440,11 +526,34 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
               ref={inputRef}
               value={castUrl}
               onChange={(e) => {
-                setCastUrl(e.target.value);
+                const newValue = e.target.value;
+                setCastUrl(newValue);
                 setPasteSuccess(false);
                 setError("");
+
                 // Clear extracted hash when input changes
                 setExtractedHash(null);
+                setCastPreview(null);
+
+                // Auto-validate and fetch preview for valid inputs
+                if (newValue.trim() && isValidFarcasterInput(newValue.trim())) {
+                  try {
+                    // Don't block UI with await, use promise
+                    extractCastData(newValue.trim())
+                      .then((data) => {
+                        setExtractedHash(data.hash);
+                        // Fetch preview automatically
+                        fetchCastPreview(data.hash);
+                      })
+                      .catch((err) => {
+                        // Just log, don't show error during typing
+                        console.log("Auto-validation error:", err);
+                      });
+                  } catch (err) {
+                    // Just log, don't stop typing
+                    console.log("Error in auto-validation:", err);
+                  }
+                }
               }}
               placeholder="https://warpcast.com/~/0x... or 0x..."
               className={`w-full border-2 pl-10 pr-3 py-2 rounded-md focus:ring-purple-500 focus:border-purple-500 ${
@@ -497,15 +606,26 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
                     </div>
                   ) : (
                     <div className="flex items-start gap-2 mt-2">
-                      {castPreview.author && castPreview.author.pfp_url && (
-                        <Image
-                          src={castPreview.author.pfp_url}
-                          alt={castPreview.author.username || "author"}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      )}
+                      {/* Profile image with fallback */}
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                        {castPreview.author?.pfp_url ? (
+                          <Image
+                            src={castPreview.author.pfp_url}
+                            alt={castPreview.author?.username || "author"}
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                          />
+                        ) : castPreview.author?.pfp?.url ? (
+                          <Image
+                            src={castPreview.author.pfp.url}
+                            alt={castPreview.author?.username || "author"}
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                          />
+                        ) : null}
+                      </div>
                       <div>
                         <div className="font-semibold text-xs">
                           {castPreview.author?.display_name ||

@@ -5,10 +5,12 @@ import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft, FiPlus } from "react-icons/fi";
 import CollectionsList from "@/components/collection/CollectionsList";
 import CollectionForm from "@/components/collection/CollectionForm";
+import { useRouter } from "next/navigation";
 
 export default function CollectionsPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const close = useClose();
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
 
   // Initialize the frame
@@ -18,11 +20,16 @@ export default function CollectionsPage() {
     }
   }, [isFrameReady, setFrameReady]);
 
+  const handleGoBack = () => {
+    // Try to go to the home page as a fallback
+    router.push("/");
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-gray-50">
       <header className="w-full max-w-3xl flex items-center p-2 border-b-4 border-black bg-white">
         <button
-          onClick={() => window.history.back()}
+          onClick={handleGoBack}
           className="mr-2 p-2 rounded-lg border-4 border-black bg-white hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] transition-all text-xl"
           aria-label="Go back"
         >

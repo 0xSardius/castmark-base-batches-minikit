@@ -10,6 +10,7 @@ import BookmarkCard from "@/components/bookmark/BookmarkCard";
 // import BookmarkForm from "~/components/bookmark/BookmarkForm";
 import CollectionForm from "@/components/collection/CollectionForm";
 import { formatDistanceToNow } from "date-fns";
+import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
@@ -26,6 +27,7 @@ export default function CollectionDetailPage({
   const close = useClose();
   const openUrl = useOpenUrl();
   const { dbUser } = useUser();
+  const router = useRouter();
 
   const {
     selectedCollection,
@@ -99,7 +101,7 @@ export default function CollectionDetailPage({
           don&apos;t have access to it.
         </p>
         <button
-          onClick={() => (window.location.href = "/collections")}
+          onClick={() => router.push("/collections")}
           className="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
         >
           View Your Collections
@@ -113,7 +115,7 @@ export default function CollectionDetailPage({
       <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b-4 border-black bg-white">
         <div className="flex items-center">
           <button
-            onClick={() => (window.location.href = "/collections")}
+            onClick={() => router.push("/collections")}
             className="mr-4 p-2 rounded-lg border-4 border-black bg-white hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] transition-all text-xl"
             aria-label="Go back"
           >

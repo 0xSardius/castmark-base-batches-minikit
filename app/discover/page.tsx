@@ -8,6 +8,7 @@ import { Collection } from "@/lib/supabase";
 import { supabase } from "@/lib/supabase";
 import CollectionCard from "@/components/collection/CollectionCard";
 import { FiTrendingUp } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 export default function DiscoverPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
@@ -16,6 +17,7 @@ export default function DiscoverPage() {
     [],
   );
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   // Initialize the frame
   useEffect(() => {
@@ -50,9 +52,8 @@ export default function DiscoverPage() {
     fetchTrendingCollections();
   }, []);
 
-  const handleSelectCollection = (collection: Collection) => {
-    // Navigate to collection detail
-    window.location.href = `/collections/${collection.id}`;
+  const handleCollectionClick = (collection: Collection) => {
+    router.push(`/collections/${collection.id}`);
   };
 
   return (
@@ -93,7 +94,7 @@ export default function DiscoverPage() {
               <CollectionCard
                 key={collection.id}
                 collection={collection}
-                onSelect={handleSelectCollection}
+                onSelect={handleCollectionClick}
               />
             ))}
           </div>
