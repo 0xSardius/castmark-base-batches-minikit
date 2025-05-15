@@ -6,10 +6,12 @@ import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft, FiLink, FiList } from "react-icons/fi";
 import BookmarkList from "../components/bookmark/BookmarkList";
 import CastImportForm from "../components/bookmark/CastImportForm";
+import { useRouter } from "next/navigation";
 
 export default function BookmarksPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const close = useClose();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"list" | "import">("list");
   const [showImported, setShowImported] = useState(false);
 
@@ -29,12 +31,21 @@ export default function BookmarksPage() {
     }, 1500);
   };
 
+  const handleGoBack = () => {
+    // Try to go back in history, but if that's not possible, go to home page
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center">
       <header className="w-full max-w-3xl flex items-center justify-between p-4 border-b-4 border-black bg-white">
         <div className="flex items-center">
           <button
-            onClick={() => window.history.back()}
+            onClick={handleGoBack}
             className="mr-4 p-2 rounded-lg border-4 border-black bg-white hover:bg-gray-100 active:translate-x-[2px] active:translate-y-[2px] transition-all text-xl"
             aria-label="Go back"
           >
