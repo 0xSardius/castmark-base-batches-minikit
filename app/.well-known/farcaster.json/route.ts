@@ -18,7 +18,7 @@ export async function GET() {
       splashImageUrl:
         process.env.NEXT_PUBLIC_SPLASH_IMAGE_URL || `${URL}/og.png`,
       splashBackgroundColor: `#${process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "ffffff"}`,
-      webhookUrl: `${URL}/api/webhook`,
+      webhookUrl: `${URL}api/webhook`,
     },
     triggers: [
       {
