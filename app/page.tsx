@@ -9,6 +9,7 @@ import {
 import { useUser } from "@/context/UserContext";
 import { FiBookmark, FiFolder, FiPlus, FiShare2 } from "react-icons/fi";
 import AuthHeader from "@/components/auth/AuthHeader";
+import Link from "next/link";
 
 export default function Home() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
@@ -25,12 +26,15 @@ export default function Home() {
 
         if (!isFrameReady) {
           console.log("Setting frame ready...");
-          setFrameReady();
+          // Set frame ready without additional options
+          await setFrameReady();
+          console.log("Frame ready set successfully");
         }
       } catch (error) {
         console.error("Error initializing frame:", error);
       } finally {
         console.log("Frame initialization complete");
+        // Even if there was an error, allow the app to proceed
         setIsLoading(false);
       }
     };
@@ -203,7 +207,7 @@ function QuickActionCard({
   color: string;
 }) {
   return (
-    <a
+    <Link
       href={href}
       className="border-4 border-black rounded-lg p-6 flex flex-col items-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] w-full max-w-xs mx-auto min-h-[160px]"
     >
@@ -216,6 +220,6 @@ function QuickActionCard({
       <p className="text-sm text-gray-700 font-medium text-center">
         {description}
       </p>
-    </a>
+    </Link>
   );
 }

@@ -4,12 +4,10 @@ import { useEffect } from "react";
 import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft } from "react-icons/fi";
 import CastImportForm from "../components/bookmark/CastImportForm";
-import { useRouter } from "next/navigation";
 
 export default function QuickSavePage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const close = useClose();
-  const router = useRouter();
 
   // Initialize the frame
   useEffect(() => {
@@ -21,12 +19,12 @@ export default function QuickSavePage() {
   const handleSaveSuccess = () => {
     // Delay for UI feedback, then navigate to bookmarks
     setTimeout(() => {
-      router.push("/bookmarks");
+      window.location.href = "/bookmarks";
     }, 1500);
   };
 
   const handleGoBack = () => {
-    router.push("/");
+    window.location.href = "/";
   };
 
   return (

@@ -11,12 +11,10 @@ import { FiArrowLeft } from "react-icons/fi";
 import UserProfile from "@/components/user/UserProfile";
 import { useUser } from "@/context/UserContext";
 import AuthHeader from "@/components/auth/AuthHeader";
-import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const close = useClose();
-  const router = useRouter();
   const { isAuthenticated, signIn } = useUser();
   const addFrame = useAddFrame();
 
@@ -35,7 +33,7 @@ export default function ProfilePage() {
   };
 
   const handleGoBack = () => {
-    router.push("/");
+    window.location.href = "/";
   };
 
   return (

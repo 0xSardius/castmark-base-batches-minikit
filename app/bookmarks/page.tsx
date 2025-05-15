@@ -6,12 +6,10 @@ import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft, FiLink, FiList } from "react-icons/fi";
 import BookmarkList from "../components/bookmark/BookmarkList";
 import CastImportForm from "../components/bookmark/CastImportForm";
-import { useRouter } from "next/navigation";
 
 export default function BookmarksPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const close = useClose();
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"list" | "import">("list");
   const [showImported, setShowImported] = useState(false);
 
@@ -32,8 +30,8 @@ export default function BookmarksPage() {
   };
 
   const handleGoBack = () => {
-    // Navigate to home page
-    router.push("/");
+    // Navigate to home page for MiniKit compatibility
+    window.location.href = "/";
   };
 
   return (

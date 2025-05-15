@@ -5,13 +5,11 @@ import { useUser } from "@/context/UserContext";
 import { Collection } from "@/lib/supabase";
 import CollectionCard from "./CollectionCard";
 import CollectionForm from "./CollectionForm";
-import { useRouter } from "next/navigation";
 
 export default function CollectionsList() {
   const { collections, loading, error, fetchCollections } =
     useCollectionStore();
   const { dbUser, isAuthenticated, showAuthPrompt } = useUser();
-  const router = useRouter();
   const [editingCollection, setEditingCollection] = useState<Collection | null>(
     null,
   );
@@ -40,7 +38,8 @@ export default function CollectionsList() {
   };
 
   const handleCollectionClick = (collection: Collection) => {
-    router.push(`/collections/${collection.id}`);
+    // Use window.location.href for navigation within MiniKit frame
+    window.location.href = `/collections/${collection.id}`;
   };
 
   if (!isAuthenticated) {

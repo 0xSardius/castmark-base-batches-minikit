@@ -5,12 +5,10 @@ import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft, FiPlus } from "react-icons/fi";
 import CollectionsList from "@/components/collection/CollectionsList";
 import CollectionForm from "@/components/collection/CollectionForm";
-import { useRouter } from "next/navigation";
 
 export default function CollectionsPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const close = useClose();
-  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
 
   // Initialize the frame
@@ -21,8 +19,8 @@ export default function CollectionsPage() {
   }, [isFrameReady, setFrameReady]);
 
   const handleGoBack = () => {
-    // Try to go to the home page as a fallback
-    router.push("/");
+    // Navigate to home page using direct location change for MiniKit compatibility
+    window.location.href = "/";
   };
 
   return (
@@ -69,6 +67,7 @@ export default function CollectionsPage() {
           onClose={() => setShowForm(false)}
           onSuccess={() => {
             setShowForm(false);
+            // Force refresh the current page instead of using router
             window.location.reload();
           }}
         />
