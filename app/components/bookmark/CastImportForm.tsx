@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   FiBookmark,
   FiLoader,
@@ -119,7 +119,7 @@ export default function CastImportForm({
   }, [extractedHash, error]);
 
   // Check if input looks like a valid Farcaster input
-  const isValidFarcasterInput = (input: string): boolean => {
+  const isValidFarcasterInput = useCallback((input: string): boolean => {
     if (!input) return false;
 
     // Normalize input by trimming whitespace and removing quotes
@@ -166,9 +166,9 @@ export default function CastImportForm({
     } catch {
       return false;
     }
-  };
+  }, []);
 
-  const extractCastData = async (url: string) => {
+  const extractCastData = useCallback(async (url: string) => {
     // Handle different formats of Farcaster URLs and hashes
     let castHash = "";
     let urlWithoutParams = url;
@@ -331,7 +331,7 @@ export default function CastImportForm({
       text: "Cast content will appear here", // This would come from API
       url: urlWithoutParams || url,
     };
-  };
+  }, []);
 
   const handlePasteFromClipboard = async () => {
     try {
@@ -386,141 +386,158 @@ export default function CastImportForm({
   };
 
   // Extract the submission logic to be reused by both form submit and auto-submit
-  const submitCast = async (url: string) => {
-    if (!url.trim()) {
-      setError("Please enter a Farcaster cast URL or hash");
-      return;
-    }
-
-    // Validate input format before proceeding
-    if (!isValidFarcasterInput(url)) {
-      setError(
-        "Invalid URL or hash format. Please enter a valid Farcaster cast URL or hash",
-      );
-      return;
-    }
-
-    if (!dbUser) {
-      const isAuth = await showAuthPrompt();
-      if (!isAuth) return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      // Extract cast data from the URL
-      const castData = await extractCastData(url);
-
-      // Display the extracted hash
-      setExtractedHash(castData.hash);
-
-      // Fetch cast preview from Neynar
-      let neynarCastData = null;
-      try {
-        console.log("Fetching cast data from API for hash:", castData.hash);
-        const res = await fetch(`/api/neynar-cast?hash=${castData.hash}`);
-
-        if (!res.ok) {
-          throw new Error(`API response not OK: ${res.status}`);
-        }
-
-        const data = await res.json();
-        console.log("Received API response:", data);
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        // Handle different response formats from Neynar SDK
-        if (data.cast) {
-          console.log("Found cast in data.cast format");
-          neynarCastData = data.cast;
-        } else if (data.result && data.result.cast) {
-          console.log("Found cast in data.result.cast format");
-          neynarCastData = data.result.cast;
-        } else {
-          console.warn("No cast data in expected format:", data);
-          throw new Error("Cast data not found in the expected format");
-        }
-      } catch (error) {
-        console.error("Failed to fetch cast data from Neynar:", error);
-        if (error instanceof Error) {
-          setError(`Cannot fetch cast details: ${error.message}`);
-        } else {
-          setError("Failed to fetch cast details from Farcaster");
-        }
-        setIsProcessing(false);
-        return; // Don't continue if we can't fetch the cast
+  const submitCast = useCallback(
+    async (url: string) => {
+      if (!url.trim()) {
+        setError("Please enter a Farcaster cast URL or hash");
+        return;
       }
 
-      // If we get here, we have valid cast data - save the bookmark
-      console.log("Saving bookmark with cast data:", {
-        hash: castData.hash,
-        authorFid: neynarCastData?.author?.fid,
-        authorUsername: neynarCastData?.author?.username,
-        authorDisplayName:
-          neynarCastData?.author?.display_name ||
-          neynarCastData?.author?.displayName,
-        authorPfpUrl:
-          neynarCastData?.author?.pfp_url || neynarCastData?.author?.pfp?.url,
-        text: neynarCastData?.text?.substring(0, 50) + "...",
-      });
+      // Validate input format before proceeding
+      if (!isValidFarcasterInput(url)) {
+        setError(
+          "Invalid URL or hash format. Please enter a valid Farcaster cast URL or hash",
+        );
+        return;
+      }
 
-      await addBookmark({
-        user_id: dbUser!.id,
-        cast_hash: castData.hash,
-        cast_author_fid: neynarCastData?.author?.fid || 0,
-        cast_author_username: neynarCastData?.author?.username || null,
-        cast_author_display_name:
-          neynarCastData?.author?.display_name ||
-          neynarCastData?.author?.displayName ||
-          null,
-        cast_author_pfp_url:
-          neynarCastData?.author?.pfp_url ||
-          neynarCastData?.author?.pfp?.url ||
-          null,
-        cast_text: neynarCastData?.text || "Cast content",
-        cast_url: neynarCastData?.url || castData.url,
-        is_public: true,
-        note: "",
-        tags: [],
-      });
+      if (!dbUser) {
+        const isAuth = await showAuthPrompt();
+        if (!isAuth) return;
+      }
 
-      // Send notification
+      setIsProcessing(true);
+
       try {
-        await sendNotification({
-          title: "Saved! 🎉",
-          body: "Cast added to your collection",
+        // Extract cast data from the URL
+        const castData = await extractCastData(url);
+
+        // Display the extracted hash
+        setExtractedHash(castData.hash);
+
+        // Fetch cast preview from Neynar
+        let neynarCastData = null;
+        try {
+          console.log("Fetching cast data from API for hash:", castData.hash);
+          const res = await fetch(`/api/neynar-cast?hash=${castData.hash}`);
+
+          if (!res.ok) {
+            throw new Error(`API response not OK: ${res.status}`);
+          }
+
+          const data = await res.json();
+          console.log("Received API response:", data);
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          // Handle different response formats from Neynar SDK
+          if (data.cast) {
+            console.log("Found cast in data.cast format");
+            neynarCastData = data.cast;
+          } else if (data.result && data.result.cast) {
+            console.log("Found cast in data.result.cast format");
+            neynarCastData = data.result.cast;
+          } else {
+            console.warn("No cast data in expected format:", data);
+            throw new Error("Cast data not found in the expected format");
+          }
+        } catch (error) {
+          console.error("Failed to fetch cast data from Neynar:", error);
+          if (error instanceof Error) {
+            setError(`Cannot fetch cast details: ${error.message}`);
+          } else {
+            setError("Failed to fetch cast details from Farcaster");
+          }
+          setIsProcessing(false);
+          return; // Don't continue if we can't fetch the cast
+        }
+
+        // If we get here, we have valid cast data - save the bookmark
+        console.log("Saving bookmark with cast data:", {
+          hash: castData.hash,
+          authorFid: neynarCastData?.author?.fid,
+          authorUsername: neynarCastData?.author?.username,
+          authorDisplayName:
+            neynarCastData?.author?.display_name ||
+            neynarCastData?.author?.displayName,
+          authorPfpUrl:
+            neynarCastData?.author?.pfp_url || neynarCastData?.author?.pfp?.url,
+          text: neynarCastData?.text?.substring(0, 50) + "...",
         });
-      } catch {
-        // Continue anyway - notification is not critical
-      }
 
-      // Show success state
-      setSuccess(true);
+        await addBookmark({
+          user_id: dbUser!.id,
+          cast_hash: castData.hash,
+          cast_author_fid: neynarCastData?.author?.fid || 0,
+          cast_author_username: neynarCastData?.author?.username || null,
+          cast_author_display_name:
+            neynarCastData?.author?.display_name ||
+            neynarCastData?.author?.displayName ||
+            null,
+          cast_author_pfp_url:
+            neynarCastData?.author?.pfp_url ||
+            neynarCastData?.author?.pfp?.url ||
+            null,
+          cast_text: neynarCastData?.text || "Cast content",
+          cast_url: neynarCastData?.url || castData.url,
+          is_public: true,
+          note: "",
+          tags: [],
+        });
 
-      // Call the onSuccess callback if provided
-      if (onSuccess) {
-        onSuccess();
-      }
+        // Send notification
+        try {
+          await sendNotification({
+            title: "Saved! 🎉",
+            body: "Cast added to your collection",
+          });
+        } catch {
+          // Continue anyway - notification is not critical
+        }
 
-      // Reset form after a delay
-      setTimeout(() => {
-        setCastUrl("");
-        setSuccess(false);
-        setExtractedHash(null);
-        setCastPreview(null);
-      }, 2000);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError("An unknown error occurred. Please try again.");
+        // Show success state
+        setSuccess(true);
+
+        // Call the onSuccess callback if provided
+        if (onSuccess) {
+          onSuccess();
+        }
+
+        // Reset form after a delay
+        setTimeout(() => {
+          setCastUrl("");
+          setSuccess(false);
+          setExtractedHash(null);
+          setCastPreview(null);
+        }, 2000);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError("An unknown error occurred. Please try again.");
+        }
+      } finally {
+        setIsProcessing(false);
       }
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+    },
+    [
+      dbUser,
+      showAuthPrompt,
+      isValidFarcasterInput,
+      extractCastData,
+      addBookmark,
+      onSuccess,
+      sendNotification,
+      setError,
+      setIsProcessing,
+      setExtractedHash,
+      setCastPreview,
+      setSuccess,
+      setCastUrl,
+    ],
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
