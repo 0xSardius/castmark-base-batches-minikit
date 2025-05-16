@@ -16,6 +16,7 @@ import Image from "next/image";
 interface CastImportFormProps {
   onSuccess?: () => void;
   initialCastUrl?: string;
+  autoSubmit?: boolean;
 }
 
 // Define a type for the Neynar cast preview
@@ -37,6 +38,7 @@ interface NeynarCastPreview {
 export default function CastImportForm({
   onSuccess,
   initialCastUrl,
+  autoSubmit = false,
 }: CastImportFormProps) {
   const { showAuthPrompt, dbUser } = useUser();
   const { addBookmark } = useBookmarkStore();
@@ -516,12 +518,13 @@ export default function CastImportForm({
 
   // Auto-submit if initialCastUrl is provided
   useEffect(() => {
-    const autoSubmit = async () => {
+    const autoSubmitCast = async () => {
       if (
         initialCastUrl &&
         isValidFarcasterInput(initialCastUrl) &&
         !isProcessing &&
-        !success
+        !success &&
+        autoSubmit
       ) {
         // Wait a moment for UI to render before auto-submitting
         setTimeout(() => {
@@ -531,11 +534,12 @@ export default function CastImportForm({
       }
     };
 
-    autoSubmit();
+    autoSubmitCast();
   }, [
     initialCastUrl,
     isProcessing,
     success,
+    autoSubmit,
     isValidFarcasterInput,
     submitCast,
   ]);

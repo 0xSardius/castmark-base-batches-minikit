@@ -10,13 +10,20 @@ export default function QuickSavePage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const searchParams = useSearchParams();
   const [castInput, setCastInput] = useState<string>("");
+  const [autoSubmitTrigger, setAutoSubmitTrigger] = useState<boolean>(false);
 
   // Get cast hash from URL if available
   useEffect(() => {
     const cast = searchParams.get("cast");
     if (cast) {
       // Format as 0x prefix hash if needed
-      setCastInput(cast.startsWith("0x") ? cast : `0x${cast}`);
+      const formattedCast = cast.startsWith("0x") ? cast : `0x${cast}`;
+      setCastInput(formattedCast);
+
+      // Trigger auto-submit after a short delay for UI to initialize
+      setTimeout(() => {
+        setAutoSubmitTrigger(true);
+      }, 500);
     }
   }, [searchParams]);
 
@@ -28,6 +35,7 @@ export default function QuickSavePage() {
   }, [isFrameReady, setFrameReady]);
 
   const handleSaveSuccess = () => {
+    // Show a success notification and redirect to bookmarks
     // Delay for UI feedback, then navigate to bookmarks
     setTimeout(() => {
       window.location.href = "/bookmarks";
@@ -55,6 +63,7 @@ export default function QuickSavePage() {
         <CastImportForm
           initialCastUrl={castInput}
           onSuccess={handleSaveSuccess}
+          autoSubmit={autoSubmitTrigger}
         />
       </div>
     </main>

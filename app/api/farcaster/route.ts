@@ -8,28 +8,14 @@ export async function GET() {
       ? process.env.NEXT_PUBLIC_URL.slice(0, -1)
       : process.env.NEXT_PUBLIC_URL;
 
-    // Return frame and mini app metadata
+    // Return action definition according to the Farcaster Actions v2 spec
     return NextResponse.json({
-      // Standard Mini App metadata - this is what appears in the client's Mini Apps list
-      miniApp: {
-        version: "next",
-        name: "Castmark",
-        description:
-          "Bookmark, tag, and organize your favorite Farcaster casts",
-        homeUrl: process.env.NEXT_PUBLIC_URL,
-        iconUrl: process.env.NEXT_PUBLIC_ICON_URL || `${baseUrl}/og.png`,
-        imageUrl: process.env.NEXT_PUBLIC_IMAGE_URL || `${baseUrl}/og.png`,
-        // Register cast actions - this is what makes Castmark appear in the cast actions menu
-        castAction: {
-          title: "Add to Castmark",
-          // When the user selects "Add to Castmark" from a cast, they'll be redirected to
-          // the save endpoint with the cast's hash as a parameter
-          url: `${baseUrl}/quick-save?cast={cast_hash}`,
-        },
-        buttonTitle: `Launch Castmark`,
-        splashImageUrl:
-          process.env.NEXT_PUBLIC_SPLASH_IMAGE_URL || `${baseUrl}/og.png`,
-        splashBackgroundColor: `#${process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "ffffff"}`,
+      name: "Add to Castmark",
+      icon: "bookmark",
+      description: "Bookmark, tag, and organize your favorite Farcaster casts",
+      aboutUrl: baseUrl,
+      action: {
+        type: "post",
       },
     });
   } catch (error) {
@@ -42,20 +28,44 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Extract cast hash from body
-    const castHash = body.castHash || "";
+    // Extract cast hash from the request body using the formats specified in Farcaster Actions spec
+    // frame_url is from the Frames spec
+    // cast_id is from the Cast Actions spec
+    // untrustedData.castId comes from Frames v1 (fallback)
+    const castHash =
+      body.cast_id?.hash ||
+      body.untrustedData?.castId?.hash ||
+      body.castHash ||
+      "";
 
-    // Redirect to quick-save page with the cast hash
-    const quickSavePage = new URL("/quick-save", req.url);
-
-    // Add cast hash as a query parameter if present
-    if (castHash) {
-      quickSavePage.searchParams.set("cast", castHash);
+    if (!castHash) {
+      // Return message as per spec for action responses
+      return NextResponse.json(
+        {
+          message: "No cast found",
+        },
+        {
+          status: 400,
+        },
+      );
     }
 
-    return NextResponse.redirect(quickSavePage);
+    console.log("Cast action triggered with hash:", castHash);
+
+    // According to the Cast Actions spec, we need to return a message
+    // rather than a redirect
+    return NextResponse.json({
+      message: "Cast saved to Castmark!",
+    });
   } catch (error) {
-    console.error("Frame processing error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("Cast action processing error:", error);
+    return NextResponse.json(
+      {
+        message: "Failed to save cast",
+      },
+      {
+        status: 400,
+      },
+    );
   }
 }

@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
           },
         },
       }),
-      "fc:miniAppId": `${baseUrl}/api/farcaster`,
+      "fc:miniAppId": baseUrl + "/api/farcaster",
     },
   };
 }
