@@ -1,7 +1,7 @@
 // app/bookmarks/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft, FiLink, FiList } from "react-icons/fi";
 import BookmarkList from "../components/bookmark/BookmarkList";
@@ -11,10 +11,12 @@ export default function BookmarksPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
   const [activeTab, setActiveTab] = useState<"list" | "import">("list");
   const [showImported, setShowImported] = useState(false);
+  const initialized = useRef(false);
 
-  // Initialize the frame
+  // Initialize the frame - only do this once
   useEffect(() => {
-    if (!isFrameReady) {
+    if (!isFrameReady && !initialized.current) {
+      initialized.current = true;
       setFrameReady();
     }
   }, [isFrameReady, setFrameReady]);

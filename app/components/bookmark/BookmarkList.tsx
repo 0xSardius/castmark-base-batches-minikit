@@ -1,5 +1,5 @@
 // components/bookmark/BookmarksList.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useUser } from "@/context/UserContext";
 import { FiFolder, FiTag } from "react-icons/fi";
@@ -14,9 +14,11 @@ export default function BookmarksList() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [showTagFilter, setShowTagFilter] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    if (dbUser?.id) {
+    if (dbUser?.id && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
       fetchBookmarks(dbUser.id);
     }
   }, [dbUser, fetchBookmarks]);
@@ -132,6 +134,7 @@ export default function BookmarksList() {
           onClose={() => setEditingBookmark(null)}
           onSuccess={() => {
             setEditingBookmark(null);
+            hasFetchedRef.current = false; // Reset the fetch flag to allow a fresh fetch
             fetchBookmarks(dbUser?.id || "");
           }}
         />
