@@ -22,6 +22,9 @@ export type Bookmark = {
   user_id: string;
   cast_hash: string;
   cast_author_fid: number | null;
+  cast_author_username: string | null;
+  cast_author_display_name: string | null;
+  cast_author_pfp_url: string | null;
   cast_text: string | null;
   cast_url: string | null;
   note: string | null;

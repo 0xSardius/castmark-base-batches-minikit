@@ -75,6 +75,11 @@ export async function POST(req: NextRequest) {
         user_id: userId,
         cast_hash: castHash,
         cast_author_fid: cast.author?.fid || 0,
+        cast_author_username: cast.author?.username || null,
+        cast_author_display_name:
+          cast.author?.display_name || cast.author?.displayName || null,
+        cast_author_pfp_url:
+          cast.author?.pfp_url || cast.author?.pfp?.url || null,
         cast_text: cast.text || "Cast content",
         cast_url: cast.url || `https://warpcast.com/~/cast/${castHash}`,
         is_public: true,

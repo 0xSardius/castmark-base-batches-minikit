@@ -9,6 +9,9 @@ interface BookmarkButtonProps {
   castData: {
     hash: string;
     authorFid: number;
+    authorUsername?: string;
+    authorDisplayName?: string;
+    authorPfpUrl?: string;
     text: string;
     url: string;
   };
@@ -41,6 +44,9 @@ export default function BookmarkButton({
         user_id: dbUser!.id,
         cast_hash: castData.hash,
         cast_author_fid: castData.authorFid,
+        cast_author_username: castData.authorUsername || null,
+        cast_author_display_name: castData.authorDisplayName || null,
+        cast_author_pfp_url: castData.authorPfpUrl || null,
         cast_text: castData.text,
         cast_url: castData.url,
         is_public: true,

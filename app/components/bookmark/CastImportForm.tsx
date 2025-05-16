@@ -457,6 +457,12 @@ export default function CastImportForm({
       console.log("Saving bookmark with cast data:", {
         hash: castData.hash,
         authorFid: neynarCastData?.author?.fid,
+        authorUsername: neynarCastData?.author?.username,
+        authorDisplayName:
+          neynarCastData?.author?.display_name ||
+          neynarCastData?.author?.displayName,
+        authorPfpUrl:
+          neynarCastData?.author?.pfp_url || neynarCastData?.author?.pfp?.url,
         text: neynarCastData?.text?.substring(0, 50) + "...",
       });
 
@@ -464,6 +470,15 @@ export default function CastImportForm({
         user_id: dbUser!.id,
         cast_hash: castData.hash,
         cast_author_fid: neynarCastData?.author?.fid || 0,
+        cast_author_username: neynarCastData?.author?.username || null,
+        cast_author_display_name:
+          neynarCastData?.author?.display_name ||
+          neynarCastData?.author?.displayName ||
+          null,
+        cast_author_pfp_url:
+          neynarCastData?.author?.pfp_url ||
+          neynarCastData?.author?.pfp?.url ||
+          null,
         cast_text: neynarCastData?.text || "Cast content",
         cast_url: neynarCastData?.url || castData.url,
         is_public: true,

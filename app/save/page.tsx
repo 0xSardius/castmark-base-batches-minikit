@@ -54,6 +54,9 @@ export default function SavePage() {
       ? {
           hash: context.location.cast.hash,
           authorFid: context.location.cast.fid,
+          authorUsername: (context.location.cast as any).username || null,
+          authorDisplayName: (context.location.cast as any).displayName || null,
+          authorPfpUrl: (context.location.cast as any).pfp || null,
           text:
             (context.location as unknown as { cast: { text?: string } }).cast
               .text || "",
@@ -63,6 +66,9 @@ export default function SavePage() {
           // Fallback for testing
           hash: "test-hash",
           authorFid: 123456,
+          authorUsername: "testuser",
+          authorDisplayName: "Test User",
+          authorPfpUrl: null,
           text: "This is a sample cast for testing",
           url: "https://warpcast.com/~/cast/test-hash",
         };
@@ -81,6 +87,9 @@ export default function SavePage() {
         user_id: dbUser.id,
         cast_hash: castData.hash,
         cast_author_fid: castData.authorFid,
+        cast_author_username: castData.authorUsername,
+        cast_author_display_name: castData.authorDisplayName,
+        cast_author_pfp_url: castData.authorPfpUrl,
         cast_text: castData.text,
         cast_url: castData.url,
         note: note,

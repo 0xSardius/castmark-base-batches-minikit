@@ -1,10 +1,11 @@
 // components/bookmark/BookmarkCard.tsx (update)
 import { Bookmark } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
-import { FiTrash2, FiEdit, FiTag, FiFolderPlus } from "react-icons/fi";
+import { FiTrash2, FiEdit, FiTag, FiFolderPlus, FiUser } from "react-icons/fi";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useState } from "react";
 import AddToCollectionModal from "./AddToCollectionModal";
+import Image from "next/image";
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
@@ -23,6 +24,46 @@ export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
 
   return (
     <div className="border border-gray-200 rounded-lg p-4 mb-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+      {/* Author Information */}
+      {(bookmark.cast_author_username ||
+        bookmark.cast_author_display_name ||
+        bookmark.cast_author_fid) && (
+        <div className="flex items-center mb-3">
+          {bookmark.cast_author_pfp_url ? (
+            <div className="w-8 h-8 rounded-full overflow-hidden mr-2 border border-gray-200">
+              <Image
+                src={bookmark.cast_author_pfp_url}
+                alt={
+                  bookmark.cast_author_display_name ||
+                  bookmark.cast_author_username ||
+                  "Author"
+                }
+                width={32}
+                height={32}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+              <FiUser size={16} className="text-gray-500" />
+            </div>
+          )}
+          <div>
+            <span className="font-medium text-sm">
+              {bookmark.cast_author_display_name ||
+                bookmark.cast_author_username ||
+                `fid:${bookmark.cast_author_fid}`}
+            </span>
+            {bookmark.cast_author_username &&
+              bookmark.cast_author_display_name && (
+                <span className="text-gray-500 text-xs ml-1">
+                  @{bookmark.cast_author_username}
+                </span>
+              )}
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-between items-start">
         <div className="flex flex-col">
           <a
