@@ -7,19 +7,47 @@
   --foreground: #111111;
 }
 
+/* Override dark mode preferences for consistent appearance in MiniApps */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #111111;
-    --foreground: #ffffff;
+    --background: #ffffff; /* Keep background white in dark mode */
+    --foreground: #111111; /* Keep text dark in dark mode */
   }
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #111111; /* Explicit color override */
+  background: #ffffff; /* Explicit background override */
   font-family: "Geist", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
   font-size: 80%;
+}
+
+/* Ensure text is visible on any background */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+div,
+button,
+a {
+  color: inherit; /* Use explicit colors from parent */
+}
+
+/* Ensure all cards and containers have explicit backgrounds */
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+/* Fix for dark mode text in inputs */
+input,
+textarea {
+  color: #111111 !important;
+  background-color: #ffffff !important;
 }

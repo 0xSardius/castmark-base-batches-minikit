@@ -10,7 +10,6 @@ import BookmarkCard from "@/components/bookmark/BookmarkCard";
 // import BookmarkForm from "~/components/bookmark/BookmarkForm";
 import CollectionForm from "@/components/collection/CollectionForm";
 import { formatDistanceToNow } from "date-fns";
-import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
@@ -27,7 +26,6 @@ export default function CollectionDetailPage({
   const close = useClose();
   const openUrl = useOpenUrl();
   const { dbUser } = useUser();
-  const router = useRouter();
 
   const {
     selectedCollection,
