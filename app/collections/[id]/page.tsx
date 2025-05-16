@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMiniKit, useClose, useOpenUrl } from "@coinbase/onchainkit/minikit";
+import { useMiniKit, useOpenUrl } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft, FiShare2, FiEdit, FiPlus, FiX } from "react-icons/fi";
 import { useCollectionStore } from "@/stores/collectionStore";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
@@ -23,7 +23,6 @@ export default function CollectionDetailPage({
   params: { id: string };
 }) {
   const { setFrameReady, isFrameReady } = useMiniKit();
-  const close = useClose();
   const openUrl = useOpenUrl();
   const { dbUser } = useUser();
 
@@ -223,15 +222,6 @@ export default function CollectionDetailPage({
           ))}
         </div>
       )}
-
-      <div className="fixed bottom-4 right-4">
-        <button
-          onClick={close}
-          className="px-4 py-2 bg-white border-4 border-black rounded-lg text-black font-bold shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
-        >
-          Close
-        </button>
-      </div>
 
       {/* Edit Collection Modal */}
       {editingCollection && (

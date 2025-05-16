@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
+import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft } from "react-icons/fi";
 import CastImportForm from "../components/bookmark/CastImportForm";
 
 export default function QuickSavePage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
-  const close = useClose();
 
   // Initialize the frame
   useEffect(() => {
@@ -42,15 +41,6 @@ export default function QuickSavePage() {
 
       <div className="w-full max-w-md">
         <CastImportForm onSuccess={handleSaveSuccess} />
-      </div>
-
-      <div className="fixed bottom-4 right-4">
-        <button
-          onClick={close}
-          className="px-4 py-2 bg-gray-200 rounded-full text-gray-700 font-medium shadow-lg hover:bg-gray-300 transition-colors"
-        >
-          Close
-        </button>
       </div>
     </main>
   );

@@ -2,11 +2,7 @@
 "use client";
 
 import { useEffect } from "react";
-import {
-  useMiniKit,
-  useClose,
-  useAddFrame,
-} from "@coinbase/onchainkit/minikit";
+import { useMiniKit, useAddFrame } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft } from "react-icons/fi";
 import UserProfile from "@/components/user/UserProfile";
 import { useUser } from "@/context/UserContext";
@@ -14,7 +10,6 @@ import AuthHeader from "@/components/auth/AuthHeader";
 
 export default function ProfilePage() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
-  const close = useClose();
   const { isAuthenticated, signIn } = useUser();
   const addFrame = useAddFrame();
 
@@ -69,15 +64,6 @@ export default function ProfilePage() {
             </button>
           </div>
         )}
-      </div>
-
-      <div className="fixed bottom-4 right-4">
-        <button
-          onClick={close}
-          className="px-4 py-2 bg-gray-200 rounded-full text-gray-700 font-medium shadow-lg hover:bg-gray-300 transition-colors"
-        >
-          Close
-        </button>
       </div>
     </main>
   );

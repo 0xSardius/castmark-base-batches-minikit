@@ -1,20 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  useMiniKit,
-  useClose,
-  useNotification,
-} from "@coinbase/onchainkit/minikit";
+import { useMiniKit, useNotification } from "@coinbase/onchainkit/minikit";
 import { useUser } from "@/context/UserContext";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useCollectionStore } from "@/stores/collectionStore";
 // import Loading from "@/components/ui/Loading";
-import { FiCheck, FiFolder, FiX, FiAlertCircle } from "react-icons/fi";
+import { FiCheck, FiFolder, FiAlertCircle } from "react-icons/fi";
 
 export default function SavePage() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
-  const close = useClose();
   const sendNotification = useNotification();
   const { showAuthPrompt, dbUser } = useUser();
   const { addBookmark } = useBookmarkStore();
@@ -93,23 +88,21 @@ export default function SavePage() {
         is_public: true,
       });
 
-      // Send notification using the hook
-      sendNotification({
+      // Update UI state
+      setIsSaving(false);
+      setSaveSuccess(true);
+      await sendNotification({
         title: "Saved! 🎉",
-        body: "Cast added to your collection",
+        body: "Cast has been bookmarked",
       });
 
-      setSaveSuccess(true);
-
-      // Close automatically after successful save
+      // Navigate home after successful save
       setTimeout(() => {
-        close();
+        window.location.href = "/";
       }, 1500);
     } catch (error) {
       console.error("Error saving bookmark:", error);
       setError("Failed to save. Please try again.");
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -156,17 +149,10 @@ export default function SavePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen p-4 bg-white">
-      <div className="flex justify-between items-center mb-6">
+    <main className="flex min-h-screen flex-col items-center p-4">
+      <header className="w-full max-w-md flex items-center justify-between mb-6">
         <h1 className="text-2xl font-black">Save Cast</h1>
-        <button
-          onClick={close}
-          className="p-3 rounded-lg border-4 border-black bg-gray-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px]"
-          aria-label="Close"
-        >
-          <FiX size={20} className="text-black" />
-        </button>
-      </div>
+      </header>
 
       {error && (
         <div className="mb-6 p-4 bg-red-400 rounded-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -321,6 +307,6 @@ export default function SavePage() {
           "Save to Castmark"
         )}
       </button>
-    </div>
+    </main>
   );
 }
