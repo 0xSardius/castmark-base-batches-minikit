@@ -54,9 +54,13 @@ export default function SavePage() {
       ? {
           hash: context.location.cast.hash,
           authorFid: context.location.cast.fid,
-          authorUsername: (context.location.cast as any).username || null,
-          authorDisplayName: (context.location.cast as any).displayName || null,
-          authorPfpUrl: (context.location.cast as any).pfp || null,
+          authorUsername:
+            (context.location.cast as { username?: string })?.username || null,
+          authorDisplayName:
+            (context.location.cast as { displayName?: string })?.displayName ||
+            null,
+          authorPfpUrl:
+            (context.location.cast as { pfp?: string })?.pfp || null,
           text:
             (context.location as unknown as { cast: { text?: string } }).cast
               .text || "",
