@@ -12,8 +12,10 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
     collection.is_registered || false,
   );
   const [isLoading, setIsLoading] = useState(false);
-  const { isConnected } = useAccount();
-  const { writeContractAsync } = useWriteContract();
+
+  // Using optional chaining to prevent errors if these hooks aren't available
+  const isConnected = useAccount?.()?.isConnected || false;
+  const writeContractAsync = useWriteContract?.()?.writeContractAsync || null;
 
   // Contract details - will update with actual contract address after deployment
   const CONTRACT_ADDRESS =
@@ -31,6 +33,11 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
   const handleRegister = async () => {
     if (!isConnected) {
       alert("Please connect your wallet first");
+      return;
+    }
+
+    if (!writeContractAsync) {
+      alert("Wallet functionality is not available");
       return;
     }
 
