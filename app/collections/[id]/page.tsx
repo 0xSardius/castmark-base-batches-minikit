@@ -182,8 +182,10 @@ export default function CollectionDetailPage({
       )}
 
       {/* Share and Register Buttons */}
-      <div className="flex justify-end gap-6 mb-6 mt-4 w-full max-w-3xl p-2">
-        <WalletConnectButton />
+      <div className="flex justify-end gap-6 mb-6 mt-4 w-full max-w-3xl px-4">
+        <div className="ml-2">
+          <WalletConnectButton />
+        </div>
         <RegisterButton collection={selectedCollection} />
         <button
           onClick={() => {
