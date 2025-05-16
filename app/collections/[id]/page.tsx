@@ -182,10 +182,7 @@ export default function CollectionDetailPage({
       )}
 
       {/* Share and Register Buttons */}
-      <div className="flex justify-end gap-6 mb-6 mt-4 w-full max-w-3xl px-4">
-        <div className="ml-2">
-          <WalletConnectButton />
-        </div>
+      <div className="flex flex-wrap justify-end gap-4 mb-6 mt-4 w-full max-w-3xl px-4">
         <RegisterButton collection={selectedCollection} />
         <button
           onClick={() => {
@@ -216,6 +213,9 @@ export default function CollectionDetailPage({
         >
           <FiShare2 /> Share
         </button>
+        <div className="mt-2 sm:mt-0">
+          <WalletConnectButton />
+        </div>
       </div>
       {/* Share Modal */}
       {showShareModal && (
