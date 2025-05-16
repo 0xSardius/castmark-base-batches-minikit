@@ -10,6 +10,7 @@ import BookmarkCard from "@/components/bookmark/BookmarkCard";
 // import BookmarkForm from "~/components/bookmark/BookmarkForm";
 import CollectionForm from "@/components/collection/CollectionForm";
 import RegisterButton from "@/components/collection/RegisterButton";
+import WalletConnectButton from "@/components/auth/WalletConnectButton";
 import { formatDistanceToNow } from "date-fns";
 
 declare global {
@@ -182,6 +183,7 @@ export default function CollectionDetailPage({
 
       {/* Share Button */}
       <div className="flex justify-end gap-4 mb-4 w-full max-w-3xl">
+        <WalletConnectButton />
         <RegisterButton collection={selectedCollection} />
         <button
           onClick={() => {

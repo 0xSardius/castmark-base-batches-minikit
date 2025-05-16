@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiCheck, FiDatabase } from "react-icons/fi";
 import { Collection } from "@/lib/supabase";
 import { useWalletClient } from "wagmi";
@@ -8,7 +8,9 @@ interface RegisterButtonProps {
 }
 
 export default function RegisterButton({ collection }: RegisterButtonProps) {
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(
+    collection.is_registered || false,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const { data: walletClient } = useWalletClient();
 
@@ -16,6 +18,14 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
   const CONTRACT_ADDRESS =
     (process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`) ||
     "0x0000000000000000000000000000000000000000";
+
+  // Debug logs
+  useEffect(() => {
+    console.log("Collection:", collection);
+    console.log("Is already registered:", collection.is_registered);
+    console.log("Contract Address:", CONTRACT_ADDRESS);
+    console.log("Wallet Client available:", !!walletClient);
+  }, [CONTRACT_ADDRESS, walletClient, collection]);
 
   const handleRegister = async () => {
     if (!walletClient) {
@@ -26,6 +36,7 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
     setIsLoading(true);
 
     try {
+      console.log("Starting registration with address:", CONTRACT_ADDRESS);
       // The ABI for just the function we need
       const registerCollectionAbi = [
         {
@@ -47,6 +58,8 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
         collection.name,
         `${process.env.NEXT_PUBLIC_URL || window.location.origin}/collections/${collection.id}`,
       ] as const;
+
+      console.log("Registration arguments:", args);
 
       // Send transaction
       const hash = await walletClient.writeContract({
