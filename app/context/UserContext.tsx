@@ -257,11 +257,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Starting sign in process...");
       // Authenticate using MiniKit
+      console.log("Before calling signIn from MiniKit");
       const result = await signIn();
+      console.log("After calling signIn from MiniKit, result:", result);
 
       if (result && result.message && result.signature) {
         console.log("Sign in successful:", result);
         // If we have user context from Frame SDK, use it
+        console.log("Context user information:", context?.user);
         if (context?.user?.fid) {
           await loadOrCreateUser(context.user.fid, {
             username: context.user.username,
@@ -270,8 +273,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
           });
           setIsAuthenticated(true);
           setIsAuthPromptVisible(false);
+          console.log("User authenticated successfully");
           return true;
+        } else {
+          console.log("No FID found in context after successful sign in");
         }
+      } else {
+        console.log("Sign in result missing expected fields:", result);
       }
       return false;
     } catch (error) {
@@ -281,16 +289,26 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const handleSignOut = async (): Promise<void> => {
-    // Clear authentication state and session data
-    setIsAuthenticated(false);
-    setDbUser(null);
+    try {
+      console.log("Starting sign out process...");
+      // Clear authentication state and session data
+      setIsAuthenticated(false);
+      setDbUser(null);
 
-    // Clear localStorage
-    localStorage.removeItem("castmarkSession");
+      // Clear localStorage
+      localStorage.removeItem("castmarkSession");
 
-    // Clear cookie
-    document.cookie =
-      "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      // Clear cookie
+      document.cookie =
+        "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+      console.log("Sign out complete");
+
+      // Force a page reload to clear any lingering state
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error during sign out:", error);
+    }
   };
 
   const refreshUser = async () => {
