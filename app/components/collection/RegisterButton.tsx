@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FiCheck, FiDatabase } from "react-icons/fi";
 import { Collection } from "@/lib/supabase";
-import { useWalletClient } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 
 interface RegisterButtonProps {
   collection: Collection;
@@ -12,7 +12,8 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
     collection.is_registered || false,
   );
   const [isLoading, setIsLoading] = useState(false);
-  const { data: walletClient } = useWalletClient();
+  const { isConnected } = useAccount();
+  const { writeContractAsync } = useWriteContract();
 
   // Contract details - will update with actual contract address after deployment
   const CONTRACT_ADDRESS =
@@ -24,11 +25,11 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
     console.log("Collection:", collection);
     console.log("Is already registered:", collection.is_registered);
     console.log("Contract Address:", CONTRACT_ADDRESS);
-    console.log("Wallet Client available:", !!walletClient);
-  }, [CONTRACT_ADDRESS, walletClient, collection]);
+    console.log("Wallet connected:", isConnected);
+  }, [CONTRACT_ADDRESS, isConnected, collection]);
 
   const handleRegister = async () => {
-    if (!walletClient) {
+    if (!isConnected) {
       alert("Please connect your wallet first");
       return;
     }
@@ -62,7 +63,7 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
       console.log("Registration arguments:", args);
 
       // Send transaction
-      const hash = await walletClient.writeContract({
+      const hash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: registerCollectionAbi,
         functionName: "registerCollection",
