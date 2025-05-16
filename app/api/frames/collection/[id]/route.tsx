@@ -63,10 +63,8 @@ export async function GET(
       process.env.NEXT_PUBLIC_URL || `https://${req.headers.get("host")}`;
     const collectionUrl = `${hostUrl}/collections/${collectionId}`;
 
-    // Frame image URL - you could generate this dynamically
-    const imageUrl =
-      collection.cover_image ||
-      `${hostUrl}/api/frames/collection/${collectionId}/image`;
+    // Frame image URL - use static logo instead of dynamic image
+    const imageUrl = collection.cover_image || `${hostUrl}/castmarklogo.png`;
 
     // Return HTML with frame metadata
     return new NextResponse(

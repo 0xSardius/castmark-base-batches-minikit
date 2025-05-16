@@ -28,9 +28,7 @@ export async function POST(
     const hostUrl =
       process.env.NEXT_PUBLIC_URL || `https://${req.headers.get("host")}`;
     const collectionUrl = `${hostUrl}/collections/${collectionId}`;
-    const imageUrl =
-      collection.cover_image ||
-      `${hostUrl}/api/frames/collection/${collectionId}/image`;
+    const imageUrl = collection.cover_image || `${hostUrl}/castmarklogo.png`;
 
     // Button 1: View Collection (redirect)
     if (buttonIndex === 1) {
