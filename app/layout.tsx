@@ -18,6 +18,9 @@ export const viewport: Viewport = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
+  // Remove trailing slash to avoid double slashes in paths
+  const baseUrl = URL?.endsWith("/") ? URL.slice(0, -1) : URL;
+
   return {
     title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
     description:
@@ -37,6 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
           },
         },
       }),
+      "fc:miniAppId": `${baseUrl}/api/farcaster`,
     },
   };
 }

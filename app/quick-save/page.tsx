@@ -1,12 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft } from "react-icons/fi";
 import CastImportForm from "../components/bookmark/CastImportForm";
+import { useSearchParams } from "next/navigation";
 
 export default function QuickSavePage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
+  const searchParams = useSearchParams();
+  const [castInput, setCastInput] = useState<string>("");
+
+  // Get cast hash from URL if available
+  useEffect(() => {
+    const cast = searchParams.get("cast");
+    if (cast) {
+      // Format as 0x prefix hash if needed
+      setCastInput(cast.startsWith("0x") ? cast : `0x${cast}`);
+    }
+  }, [searchParams]);
 
   // Initialize the frame
   useEffect(() => {
@@ -40,7 +52,10 @@ export default function QuickSavePage() {
       </header>
 
       <div className="w-full max-w-md">
-        <CastImportForm onSuccess={handleSaveSuccess} />
+        <CastImportForm
+          initialCastUrl={castInput}
+          onSuccess={handleSaveSuccess}
+        />
       </div>
     </main>
   );

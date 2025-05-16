@@ -15,6 +15,7 @@ import Image from "next/image";
 
 interface CastImportFormProps {
   onSuccess?: () => void;
+  initialCastUrl?: string;
 }
 
 // Define a type for the Neynar cast preview
@@ -33,13 +34,16 @@ interface NeynarCastPreview {
   error?: string;
 }
 
-export default function CastImportForm({ onSuccess }: CastImportFormProps) {
+export default function CastImportForm({
+  onSuccess,
+  initialCastUrl,
+}: CastImportFormProps) {
   const { showAuthPrompt, dbUser } = useUser();
   const { addBookmark } = useBookmarkStore();
   const sendNotification = useNotification();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [castUrl, setCastUrl] = useState("");
+  const [castUrl, setCastUrl] = useState(initialCastUrl || "");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -70,7 +74,10 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
       }
     };
 
-    tryReadClipboard();
+    // Only try to read clipboard if we don't have an initial URL
+    if (!initialCastUrl) {
+      tryReadClipboard();
+    }
 
     // TEST: Try parsing example URL to verify fix (will show in console)
     const testUrl = "https://warpcast.com/overproticol/0x5cd3f740";
@@ -98,7 +105,16 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
     } catch (e) {
       console.error("TEST - Error parsing URL:", e);
     }
-  }, [castUrl]);
+  }, [castUrl, initialCastUrl]);
+
+  // When extractedHash changes, fetch preview
+  useEffect(() => {
+    if (extractedHash && !error) {
+      fetchCastPreview(extractedHash);
+    } else {
+      setCastPreview(null);
+    }
+  }, [extractedHash, error]);
 
   // Check if input looks like a valid Farcaster input
   const isValidFarcasterInput = (input: string): boolean => {
@@ -367,29 +383,15 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
     }
   };
 
-  // When extractedHash changes, fetch preview
-  useEffect(() => {
-    if (extractedHash && !error) {
-      fetchCastPreview(extractedHash);
-    } else {
-      setCastPreview(null);
-    }
-  }, [extractedHash, error]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess(false);
-    setExtractedHash(null);
-    setCastPreview(null);
-
-    if (!castUrl.trim()) {
+  // Extract the submission logic to be reused by both form submit and auto-submit
+  const submitCast = async (url: string) => {
+    if (!url.trim()) {
       setError("Please enter a Farcaster cast URL or hash");
       return;
     }
 
     // Validate input format before proceeding
-    if (!isValidFarcasterInput(castUrl)) {
+    if (!isValidFarcasterInput(url)) {
       setError(
         "Invalid URL or hash format. Please enter a valid Farcaster cast URL or hash",
       );
@@ -405,7 +407,7 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
 
     try {
       // Extract cast data from the URL
-      const castData = await extractCastData(castUrl);
+      const castData = await extractCastData(url);
 
       // Display the extracted hash
       setExtractedHash(castData.hash);
@@ -496,14 +498,47 @@ export default function CastImportForm({ onSuccess }: CastImportFormProps) {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError(
-          "Failed to import cast. Please try again with a different URL or hash.",
-        );
+        setError("An unknown error occurred. Please try again.");
       }
     } finally {
       setIsProcessing(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+    setExtractedHash(null);
+    setCastPreview(null);
+    await submitCast(castUrl);
+  };
+
+  // Auto-submit if initialCastUrl is provided
+  useEffect(() => {
+    const autoSubmit = async () => {
+      if (
+        initialCastUrl &&
+        isValidFarcasterInput(initialCastUrl) &&
+        !isProcessing &&
+        !success
+      ) {
+        // Wait a moment for UI to render before auto-submitting
+        setTimeout(() => {
+          // Directly call the internal submit logic instead of using a fake event
+          submitCast(initialCastUrl);
+        }, 500);
+      }
+    };
+
+    autoSubmit();
+  }, [
+    initialCastUrl,
+    isProcessing,
+    success,
+    isValidFarcasterInput,
+    submitCast,
+  ]);
 
   return (
     <div className="bg-white rounded-lg border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
