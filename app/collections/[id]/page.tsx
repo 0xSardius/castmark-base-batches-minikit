@@ -9,6 +9,7 @@ import { useUser } from "@/context/UserContext";
 import BookmarkCard from "@/components/bookmark/BookmarkCard";
 // import BookmarkForm from "~/components/bookmark/BookmarkForm";
 import CollectionForm from "@/components/collection/CollectionForm";
+import RegisterButton from "@/components/collection/RegisterButton";
 import { formatDistanceToNow } from "date-fns";
 
 declare global {
@@ -133,11 +134,11 @@ export default function CollectionDetailPage({
         <div className="flex space-x-2">
           <button
             onClick={() => {
-              // Create a shareable URL for the collection
-              const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`;
+              // Create a Frame URL for better sharing in Farcaster
+              const frameUrl = `${process.env.NEXT_PUBLIC_URL || window.location.origin}/api/frames/collection/${selectedCollection.id}`;
 
-              // Create a compose URL for Warpcast with the collection URL embedded
-              const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(collectionUrl)}`;
+              // Create a compose URL for Warpcast with the frame URL embedded
+              const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(frameUrl)}`;
 
               // First try using openUrl from MiniKit
               try {
@@ -180,14 +181,15 @@ export default function CollectionDetailPage({
       )}
 
       {/* Share Button */}
-      <div className="flex justify-end mb-4 w-full max-w-3xl">
+      <div className="flex justify-end gap-4 mb-4 w-full max-w-3xl">
+        <RegisterButton collection={selectedCollection} />
         <button
           onClick={() => {
-            // Create a shareable URL for the collection
-            const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`;
+            // Create a Frame URL for better sharing in Farcaster
+            const frameUrl = `${process.env.NEXT_PUBLIC_URL || window.location.origin}/api/frames/collection/${selectedCollection.id}`;
 
-            // Create a compose URL for Warpcast with the collection URL embedded
-            const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(collectionUrl)}`;
+            // Create a compose URL for Warpcast with the frame URL embedded
+            const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(frameUrl)}`;
 
             // First try using openUrl from MiniKit
             try {
@@ -222,11 +224,11 @@ export default function CollectionDetailPage({
             <div className="flex flex-col gap-4 mb-4">
               <button
                 onClick={() => {
-                  // Create a shareable URL for the collection
-                  const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`;
+                  // Create a Frame URL for better sharing in Farcaster
+                  const frameUrl = `${process.env.NEXT_PUBLIC_URL || window.location.origin}/api/frames/collection/${selectedCollection.id}`;
 
-                  // Create a compose URL for Warpcast with the collection URL embedded
-                  const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(collectionUrl)}`;
+                  // Create a compose URL for Warpcast with the frame URL embedded
+                  const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(frameUrl)}`;
 
                   // First try using openUrl from MiniKit
                   try {
@@ -244,7 +246,7 @@ export default function CollectionDetailPage({
 
                       // Last resort: Copy the collection URL to clipboard
                       navigator.clipboard
-                        .writeText(collectionUrl)
+                        .writeText(shareUrl)
                         .then(() => {
                           alert(
                             "Collection URL copied to clipboard! You can paste it in Warpcast to share.",
@@ -258,7 +260,7 @@ export default function CollectionDetailPage({
                           );
                           alert(
                             "Could not share automatically. Please copy this URL manually: " +
-                              collectionUrl,
+                              shareUrl,
                           );
                         });
                     }

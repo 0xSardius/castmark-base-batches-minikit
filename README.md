@@ -1,104 +1,115 @@
-# MiniKit Template
+# Castmark - Farcaster Bookmark Manager
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-onchain --mini`](), configured with:
+Castmark is a bookmark manager for Farcaster casts. Save, organize, and share your favorite casts from the Farcaster network.
 
-- [MiniKit](https://docs.base.org/builderkits/minikit/overview)
-- [OnchainKit](https://www.base.org/builders/onchainkit)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Next.js](https://nextjs.org/docs)
+## Features
 
-## Getting Started
+- Save casts from Farcaster
+- Organize casts into collections
+- Add tags and notes to your bookmarks
+- Share collections with others via Farcaster Frames
+- Register collections on Base blockchain
 
-1. Install dependencies:
+## Base Integration
+
+Castmark uses Base blockchain to register collections, providing:
+
+1. **Verifiability**: Permanently register collections on-chain
+2. **Attribution**: Connect collections to your wallet identity
+3. **Interoperability**: Allow other applications to verify and reference your collections
+
+## Setup Instructions
+
+### 1. Environment Variables
+
+Create a `.env.local` file with:
+
+```
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Smart Contract (after deployment)
+NEXT_PUBLIC_CONTRACT_ADDRESS=your_contract_address_on_base
+
+# App URL
+NEXT_PUBLIC_URL=https://your-deployment-url.com
+```
+
+### 2. Database Migration
+
+Add the following columns to your Supabase `collections` table:
+
+- `is_registered` (boolean, default: false)
+- `transaction_hash` (text, nullable)
+
+### 3. Contract Deployment
+
+The app expects a simple registry contract deployed on Base with a `registerCollection` function that takes the following parameters:
+
+- `collectionId` (string): The ID of the collection
+- `name` (string): The name of the collection
+- `url` (string): The URL to the collection
+
+The function should store the registration status and emit an event with the collection details.
+
+After deploying your contract, add its address to your `.env.local` file:
+
+```
+NEXT_PUBLIC_CONTRACT_ADDRESS=your_contract_address_on_base
+```
+
+### 4. Development
+
 ```bash
+# Install dependencies
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
-```
 
-2. Verify environment variables, these will be set up by the `npx create-onchain --mini` command:
-
-You can regenerate the FARCASTER Account Assocation environment variables by running `npx create-onchain --manifest` in your project directory.
-
-The environment variables enable the following features:
-
-- Frame metadata - Sets up the Frame Embed that will be shown when you cast your frame
-- Account assocation - Allows users to add your frame to their account, enables notifications
-- Redis API keys - Enable Webhooks and background notifications for your application by storing users notification details
-
-```bash
-# Required for Frame metadata
-NEXT_PUBLIC_URL=
-NEXT_PUBLIC_VERSION=
-NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=
-NEXT_PUBLIC_ICON_URL=
-NEXT_PUBLIC_IMAGE_URL=
-NEXT_PUBLIC_SPLASH_IMAGE_URL=
-NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR=
-
-# Required to allow users to add your frame
-FARCASTER_HEADER=
-FARCASTER_PAYLOAD=
-FARCASTER_SIGNATURE=
-
-# Required for webhooks and background notifications
-REDIS_URL=
-REDIS_TOKEN=
-```
-
-3. Start the development server:
-```bash
+# Run development server
 npm run dev
 ```
 
-## Template Features
+### 5. Build and Deploy
 
-### Frame Configuration
-- `.well-known/farcaster.json` endpoint configured for Frame metadata and account association
-- Frame metadata automatically added to page headers in `layout.tsx`
+```bash
+# Build for production
+npm run build
 
-### Background Notifications
-- Redis-backed notification system using Upstash
-- Ready-to-use notification endpoints in `api/notify` and `api/webhook`
-- Notification client utilities in `lib/notification-client.ts`
+# Deploy (e.g., to Vercel)
+vercel deploy
+```
 
-### Theming
-- Custom theme defined in `theme.css` with OnchainKit variables
-- Pixel font integration with Pixelify Sans
-- Dark/light mode support through OnchainKit
+## How It Works
 
-### MiniKit Provider
-The app is wrapped with `MiniKitProvider` in `providers.tsx`, configured with:
-- OnchainKit integration
-- Access to Frames context
-- Sets up Wagmi Connectors
-- Sets up Frame SDK listeners
-- Applies Safe Area Insets
+### Saving Casts
 
-## Customization
+1. Paste a Farcaster cast URL or hash
+2. Add optional tags and notes
+3. Save to your bookmarks
 
-To get started building your own frame, follow these steps:
+### Creating Collections
 
-1. Remove the DemoComponents:
-   - Delete `components/DemoComponents.tsx`
-   - Remove demo-related imports from `page.tsx`
+1. Create a new collection with a name and description
+2. Add bookmarks to your collection
+3. Share your collection with others
 
-2. Start building your Frame:
-   - Modify `page.tsx` to create your Frame UI
-   - Update theme variables in `theme.css`
-   - Adjust MiniKit configuration in `providers.tsx`
+### Registering on Base
 
-3. Add your frame to your account:
-   - Cast your frame to see it in action
-   - Share your frame with others to start building your community
+1. Go to a collection detail page
+2. Click "Register on Base"
+3. Confirm the transaction in your wallet
+4. Your collection is now permanently registered on Base blockchain
 
-## Learn More
+### Sharing with Frames
 
-- [MiniKit Documentation](https://docs.base.org/builderkits/minikit/overview)
-- [OnchainKit Documentation](https://docs.base.org/builderkits/onchainkit/getting-started)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+1. Go to a collection
+2. Click "Share"
+3. The collection is shared with a Farcaster Frame that others can interact with
+
+## Technologies Used
+
+- Next.js
+- Supabase
+- Base Blockchain
+- Farcaster Frames
+- Wagmi/Viem for blockchain interactions

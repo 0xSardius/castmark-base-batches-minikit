@@ -43,6 +43,8 @@ export type Collection = {
   cover_image: string | null;
   created_at: string;
   updated_at: string;
+  is_registered?: boolean;
+  transaction_hash?: string;
 };
 
 export type CollectionItem = {
