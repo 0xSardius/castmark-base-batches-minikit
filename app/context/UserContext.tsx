@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useState,
   ReactNode,
+  useCallback,
 } from "react";
 import { useMiniKit, useAuthenticate } from "@coinbase/onchainkit/minikit";
 import { supabase, User } from "@/lib/supabase"; // Adjust import path as needed
@@ -113,41 +114,68 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   // Function to load or create a user in the database
-  const loadOrCreateUser = async (
-    fid: number,
-    userData?: {
-      username?: string;
-      displayName?: string;
-      pfpUrl?: string;
-    },
-  ) => {
-    try {
-      console.log("Loading/creating user...", { fid, userData });
+  const loadOrCreateUser = useCallback(
+    async (
+      fid: number,
+      userData?: {
+        username?: string;
+        displayName?: string;
+        pfpUrl?: string;
+      },
+    ) => {
+      try {
+        console.log("Loading/creating user...", { fid, userData });
 
-      // Check if user exists in database
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("fid", fid)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
-        throw error;
-      }
-
-      if (data) {
-        console.log("Existing user found:", data);
-        setDbUser(data as User);
-        setIsAuthenticated(true);
-
-        // Update last login
-        await supabase
+        // Check if user exists in database
+        const { data, error } = await supabase
           .from("users")
-          .update({ last_login: new Date().toISOString() })
-          .eq("id", data.id);
+          .select("*")
+          .eq("fid", fid)
+          .single();
 
-        // Save session
-        if (userData) {
+        if (error && error.code !== "PGRST116") {
+          throw error;
+        }
+
+        if (data) {
+          console.log("Existing user found:", data);
+          setDbUser(data as User);
+          setIsAuthenticated(true);
+
+          // Update last login
+          await supabase
+            .from("users")
+            .update({ last_login: new Date().toISOString() })
+            .eq("id", data.id);
+
+          // Save session
+          if (userData) {
+            saveSession({
+              fid,
+              username: userData.username,
+              displayName: userData.displayName,
+              pfpUrl: userData.pfpUrl,
+            });
+          }
+        } else if (userData) {
+          console.log("Creating new user...");
+          const { data: newUser, error: createError } = await supabase
+            .from("users")
+            .insert({
+              fid: fid,
+              username: userData.username,
+              display_name: userData.displayName,
+              pfp_url: userData.pfpUrl,
+            })
+            .select()
+            .single();
+
+          if (createError) throw createError;
+          console.log("New user created:", newUser);
+          setDbUser(newUser as User);
+          setIsAuthenticated(true);
+
+          // Save session
           saveSession({
             fid,
             username: userData.username,
@@ -155,39 +183,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
             pfpUrl: userData.pfpUrl,
           });
         }
-      } else if (userData) {
-        console.log("Creating new user...");
-        const { data: newUser, error: createError } = await supabase
-          .from("users")
-          .insert({
-            fid: fid,
-            username: userData.username,
-            display_name: userData.displayName,
-            pfp_url: userData.pfpUrl,
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        console.log("New user created:", newUser);
-        setDbUser(newUser as User);
-        setIsAuthenticated(true);
-
-        // Save session
-        saveSession({
-          fid,
-          username: userData.username,
-          displayName: userData.displayName,
-          pfpUrl: userData.pfpUrl,
-        });
+      } catch (err) {
+        console.error("Error loading user data:", err);
+      } finally {
+        setLoading(false);
+        setAuthAttempted(true);
       }
-    } catch (err) {
-      console.error("Error loading user data:", err);
-    } finally {
-      setLoading(false);
-      setAuthAttempted(true);
-    }
-  };
+    },
+    [],
+  );
 
   // Check for existing session on mount
   useEffect(() => {
@@ -237,7 +241,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     };
 
     checkSession();
-  }, []);
+  }, [loadOrCreateUser]);
 
   // Get user context from MiniKit and load or create user in database
   useEffect(() => {
@@ -251,7 +255,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } else if (!loading) {
       setAuthAttempted(true);
     }
-  }, [context, loading]);
+  }, [context, loading, loadOrCreateUser]);
 
   const handleSignIn = async (): Promise<boolean> => {
     try {
