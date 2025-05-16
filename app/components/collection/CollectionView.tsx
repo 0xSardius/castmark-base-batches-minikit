@@ -24,13 +24,47 @@ export default function CollectionView({
   const handleShare = async () => {
     setIsSharing(true);
     try {
+      // Create a shareable URL for the collection
+      const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${collection.id}`;
+
+      // Create a compose URL for Warpcast with the collection URL embedded
       const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
         `Check out my "${collection.name}" collection on Castmark!${collection.description ? "\n\n" + collection.description : ""}`,
-      )}&embeds[]=${encodeURIComponent(`${process.env.NEXT_PUBLIC_URL}/collections/${collection.id}`)}`;
+      )}&embeds[]=${encodeURIComponent(collectionUrl)}`;
 
-      await openUrl(shareUrl);
-      setShareSuccess(true);
-      setTimeout(() => setShareSuccess(false), 2000);
+      // First try using openUrl from MiniKit
+      try {
+        await openUrl(shareUrl);
+        setShareSuccess(true);
+        setTimeout(() => setShareSuccess(false), 2000);
+      } catch (error) {
+        console.error("Error using openUrl:", error);
+
+        // Fallback: Try opening in a new window/tab
+        try {
+          window.open(shareUrl, "_blank");
+          setShareSuccess(true);
+          setTimeout(() => setShareSuccess(false), 2000);
+        } catch (windowError) {
+          console.error("Error opening window:", windowError);
+
+          // Last resort: Copy the collection URL to clipboard
+          try {
+            await navigator.clipboard.writeText(collectionUrl);
+            alert(
+              "Collection URL copied to clipboard! You can paste it in Warpcast to share.",
+            );
+            setShareSuccess(true);
+            setTimeout(() => setShareSuccess(false), 2000);
+          } catch (clipboardError) {
+            console.error("Error copying to clipboard:", clipboardError);
+            alert(
+              "Could not share automatically. Please copy this URL manually: " +
+                collectionUrl,
+            );
+          }
+        }
+      }
     } catch (error) {
       console.error("Error sharing collection:", error);
     } finally {

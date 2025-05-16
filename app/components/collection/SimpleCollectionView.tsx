@@ -39,8 +39,37 @@ export default function SimpleCollectionView() {
   const handleShare = async (collectionId: string, name: string) => {
     try {
       setError(null);
-      const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(`${process.env.NEXT_PUBLIC_URL}/collections/${collectionId}`)}`;
-      openUrl(shareUrl);
+
+      // Create a shareable URL for the collection
+      const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${collectionId}`;
+
+      // Create a compose URL for Warpcast with the collection URL embedded
+      const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(collectionUrl)}`;
+
+      // First try using openUrl from MiniKit
+      try {
+        openUrl(shareUrl);
+      } catch (error) {
+        console.error("Error using openUrl:", error);
+
+        // Fallback: Try opening in a new window/tab
+        try {
+          window.open(shareUrl, "_blank");
+        } catch (windowError) {
+          console.error("Error opening window:", windowError);
+
+          // Last resort: Copy the collection URL to clipboard
+          try {
+            await navigator.clipboard.writeText(collectionUrl);
+            alert(
+              "Collection URL copied to clipboard! You can paste it in Warpcast to share.",
+            );
+          } catch (clipboardError) {
+            console.error("Error copying to clipboard:", clipboardError);
+            setError("Could not share. Please try again.");
+          }
+        }
+      }
     } catch (error) {
       setError("Failed to share collection. Please try again.");
       console.error("Error sharing collection:", error);

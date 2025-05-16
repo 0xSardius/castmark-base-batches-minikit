@@ -132,7 +132,30 @@ export default function CollectionDetailPage({
         </div>
         <div className="flex space-x-2">
           <button
-            onClick={() => setShowShareModal(true)}
+            onClick={() => {
+              // Create a shareable URL for the collection
+              const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`;
+
+              // Create a compose URL for Warpcast with the collection URL embedded
+              const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(collectionUrl)}`;
+
+              // First try using openUrl from MiniKit
+              try {
+                openUrl(shareUrl);
+              } catch (error) {
+                console.error("Error using openUrl:", error);
+
+                // Fallback: Try opening in a new window/tab
+                try {
+                  window.open(shareUrl, "_blank");
+                } catch (windowError) {
+                  console.error("Error opening window:", windowError);
+
+                  // Last resort: Show modal with copy option
+                  setShowShareModal(true);
+                }
+              }
+            }}
             className="p-2 border-4 border-black rounded-lg text-gray-600 hover:text-purple-600 bg-white shadow-[2px_2px_0_0_#000] hover:shadow-none active:shadow-none transition-all"
             aria-label="Share collection"
           >
@@ -159,7 +182,30 @@ export default function CollectionDetailPage({
       {/* Share Button */}
       <div className="flex justify-end mb-4 w-full max-w-3xl">
         <button
-          onClick={() => setShowShareModal(true)}
+          onClick={() => {
+            // Create a shareable URL for the collection
+            const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`;
+
+            // Create a compose URL for Warpcast with the collection URL embedded
+            const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(collectionUrl)}`;
+
+            // First try using openUrl from MiniKit
+            try {
+              openUrl(shareUrl);
+            } catch (error) {
+              console.error("Error using openUrl:", error);
+
+              // Fallback: Try opening in a new window/tab
+              try {
+                window.open(shareUrl, "_blank");
+              } catch (windowError) {
+                console.error("Error opening window:", windowError);
+
+                // Last resort: Show modal with copy option
+                setShowShareModal(true);
+              }
+            }
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-purple-400 text-black font-black rounded-lg border-4 border-black shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] active:shadow-none transition-all text-lg"
         >
           <FiShare2 /> Share
@@ -176,8 +222,47 @@ export default function CollectionDetailPage({
             <div className="flex flex-col gap-4 mb-4">
               <button
                 onClick={() => {
-                  const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(`${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`)}`;
-                  openUrl(shareUrl);
+                  // Create a shareable URL for the collection
+                  const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${selectedCollection.id}`;
+
+                  // Create a compose URL for Warpcast with the collection URL embedded
+                  const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${selectedCollection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(collectionUrl)}`;
+
+                  // First try using openUrl from MiniKit
+                  try {
+                    openUrl(shareUrl);
+                    setShowShareModal(false);
+                  } catch (error) {
+                    console.error("Error using openUrl:", error);
+
+                    // Fallback: Try opening in a new window/tab
+                    try {
+                      window.open(shareUrl, "_blank");
+                      setShowShareModal(false);
+                    } catch (windowError) {
+                      console.error("Error opening window:", windowError);
+
+                      // Last resort: Copy the collection URL to clipboard
+                      navigator.clipboard
+                        .writeText(collectionUrl)
+                        .then(() => {
+                          alert(
+                            "Collection URL copied to clipboard! You can paste it in Warpcast to share.",
+                          );
+                          setShowShareModal(false);
+                        })
+                        .catch((clipboardError) => {
+                          console.error(
+                            "Error copying to clipboard:",
+                            clipboardError,
+                          );
+                          alert(
+                            "Could not share automatically. Please copy this URL manually: " +
+                              collectionUrl,
+                          );
+                        });
+                    }
+                  }
                 }}
                 className="w-full py-4 bg-purple-400 text-black font-black rounded-lg border-4 border-black shadow-[2px_2px_0_0_#000] hover:shadow-none transition-all text-lg flex items-center justify-center gap-2"
               >

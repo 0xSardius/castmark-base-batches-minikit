@@ -27,11 +27,39 @@ export default function CollectionCard({
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Create a shareable URL for the collection
+    const collectionUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${collection.id}`;
+
+    // Create a compose URL for Warpcast with the collection URL embedded
+    const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out my "${collection.name}" collection on Castmark!`)}&embeds[]=${encodeURIComponent(collectionUrl)}`;
+
+    // First try using openUrl from MiniKit
     try {
-      const shareUrl = `${process.env.NEXT_PUBLIC_URL}/collections/${collection.id}`;
       await openUrl(shareUrl);
     } catch (error) {
-      console.error("Error sharing collection:", error);
+      console.error("Error using openUrl:", error);
+
+      // Fallback: Try opening in a new window/tab
+      try {
+        window.open(shareUrl, "_blank");
+      } catch (windowError) {
+        console.error("Error opening window:", windowError);
+
+        // Last resort: Copy the collection URL to clipboard
+        try {
+          await navigator.clipboard.writeText(collectionUrl);
+          alert(
+            "Collection URL copied to clipboard! You can paste it in Warpcast to share.",
+          );
+        } catch (clipboardError) {
+          console.error("Error copying to clipboard:", clipboardError);
+          alert(
+            "Could not share automatically. Please copy this URL manually: " +
+              collectionUrl,
+          );
+        }
+      }
     }
   };
 
