@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useMiniKit, useOpenUrl } from "@coinbase/onchainkit/minikit";
-import { FiArrowLeft, FiShare2, FiEdit, FiPlus, FiX } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiShare2,
+  FiEdit,
+  FiPlus,
+  FiX,
+  FiCheck,
+} from "react-icons/fi";
 import { useCollectionStore } from "@/stores/collectionStore";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useUser } from "@/context/UserContext";
@@ -12,6 +19,7 @@ import CollectionForm from "@/components/collection/CollectionForm";
 import RegisterButton from "@/components/collection/RegisterButton";
 import WalletConnectButton from "@/components/auth/WalletConnectButton";
 import { formatDistanceToNow } from "date-fns";
+import { useWalletClient } from "wagmi";
 
 declare global {
   interface Window {
@@ -27,6 +35,7 @@ export default function CollectionDetailPage({
   const { setFrameReady, isFrameReady } = useMiniKit();
   const openUrl = useOpenUrl();
   const { dbUser } = useUser();
+  const { data: walletClient } = useWalletClient();
 
   const {
     selectedCollection,
@@ -183,7 +192,15 @@ export default function CollectionDetailPage({
 
       {/* Share and Register Buttons */}
       <div className="flex flex-wrap justify-end gap-4 mb-6 mt-4 w-full max-w-3xl px-4">
-        <RegisterButton collection={selectedCollection} />
+        {!selectedCollection.is_registered && (
+          <RegisterButton collection={selectedCollection} />
+        )}
+        {selectedCollection.is_registered && (
+          <div className="flex items-center gap-2 px-5 py-2 rounded-lg bg-green-50 text-green-600 font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <FiCheck className="text-lg" />
+            <span>Registered on Base</span>
+          </div>
+        )}
         <button
           onClick={() => {
             // Create a Frame URL for better sharing in Farcaster
@@ -213,10 +230,17 @@ export default function CollectionDetailPage({
         >
           <FiShare2 /> Share
         </button>
-        <div className="mt-2 sm:mt-0">
-          <WalletConnectButton />
-        </div>
       </div>
+
+      {/* Connect Wallet Button */}
+      {!walletClient && (
+        <div className="w-full max-w-3xl mb-6 px-4">
+          <div className="flex justify-center">
+            <WalletConnectButton />
+          </div>
+        </div>
+      )}
+
       {/* Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
