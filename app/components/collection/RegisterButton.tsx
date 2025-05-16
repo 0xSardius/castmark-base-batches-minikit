@@ -13,9 +13,9 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  // Using optional chaining to prevent errors if these hooks aren't available
-  const isConnected = useAccount?.()?.isConnected || false;
-  const writeContractAsync = useWriteContract?.()?.writeContractAsync || null;
+  // Using optional chaining to safely access account and contract
+  const { isConnected } = useAccount() || {};
+  const { writeContractAsync } = useWriteContract() || {};
 
   // Contract details - will update with actual contract address after deployment
   const CONTRACT_ADDRESS =
