@@ -2,14 +2,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMiniKit, useClose } from "@coinbase/onchainkit/minikit";
+import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { FiArrowLeft, FiLink, FiList } from "react-icons/fi";
 import BookmarkList from "../components/bookmark/BookmarkList";
 import CastImportForm from "../components/bookmark/CastImportForm";
 
 export default function BookmarksPage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
-  const close = useClose();
   const [activeTab, setActiveTab] = useState<"list" | "import">("list");
   const [showImported, setShowImported] = useState(false);
 
@@ -89,15 +88,6 @@ export default function BookmarksPage() {
             </p>
           </div>
         )}
-      </div>
-
-      <div className="fixed bottom-4 right-4">
-        <button
-          onClick={close}
-          className="px-4 py-2 bg-gray-200 rounded-full text-gray-700 font-medium shadow-lg hover:bg-gray-300 transition-colors"
-        >
-          Close
-        </button>
       </div>
     </main>
   );
