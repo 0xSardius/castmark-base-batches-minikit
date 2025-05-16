@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useUser } from "@/context/UserContext";
-import { Identity, Avatar, Name } from "@coinbase/onchainkit/identity";
 import { FiFolder, FiTag } from "react-icons/fi";
 import Loading from "@/components/ui/loading";
 import BookmarkCard from "@/components/bookmark/BookmarkCard";
@@ -102,43 +101,28 @@ export default function BookmarksList() {
         </div>
       ) : (
         <div className="space-y-6 w-full max-w-md mx-auto">
-          {filteredBookmarks.map((bookmark) => {
-            // Generate a proxy address for OnchainKit Identity from FID
-            const authorProxyAddress =
-              `0x${bookmark.cast_author_fid?.toString(16).padStart(40, "0")}` as `0x${string}`;
+          {filteredBookmarks.map((bookmark) => (
+            <div
+              key={bookmark.id}
+              className="border-4 border-black rounded-lg p-6 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full"
+            >
+              <BookmarkCard bookmark={bookmark} onEdit={setEditingBookmark} />
 
-            return (
-              <div
-                key={bookmark.id}
-                className="border-4 border-black rounded-lg p-6 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full"
-              >
-                <div className="mb-2">
-                  <Identity address={authorProxyAddress}>
-                    <div className="flex items-center">
-                      <Avatar className="h-6 w-6 mr-2" />
-                      <Name className="text-sm font-medium" />
-                    </div>
-                  </Identity>
+              {/* Tag display */}
+              {bookmark.tags && bookmark.tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {bookmark.tags.map((tag: string) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-300 text-black border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-
-                <BookmarkCard bookmark={bookmark} onEdit={setEditingBookmark} />
-
-                {/* Tag display */}
-                {bookmark.tags && bookmark.tags.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {bookmark.tags.map((tag: string) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-300 text-black border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              )}
+            </div>
+          ))}
         </div>
       )}
 

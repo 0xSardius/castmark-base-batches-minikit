@@ -5,6 +5,7 @@ import { FiTrash2, FiEdit, FiTag, FiFolderPlus, FiUser } from "react-icons/fi";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useState } from "react";
 import AddToCollectionModal from "./AddToCollectionModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import Image from "next/image";
 
 interface BookmarkCardProps {
@@ -15,11 +16,19 @@ interface BookmarkCardProps {
 export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
   const { deleteBookmark } = useBookmarkStore();
   const [showAddToCollection, setShowAddToCollection] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this bookmark?")) {
-      await deleteBookmark(bookmark.id);
-    }
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = async () => {
+    await deleteBookmark(bookmark.id);
+    setShowDeleteConfirmation(false);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
   };
 
   return (
@@ -135,6 +144,14 @@ export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
         <AddToCollectionModal
           bookmarkId={bookmark.id}
           onClose={() => setShowAddToCollection(false)}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <DeleteConfirmationModal
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
         />
       )}
     </div>
