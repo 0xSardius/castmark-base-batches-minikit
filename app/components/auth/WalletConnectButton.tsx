@@ -6,7 +6,13 @@ import {
   WalletDropdown,
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
-import { Identity, Avatar, Name, Address } from "@coinbase/onchainkit/identity";
+import {
+  Identity,
+  Avatar,
+  Name,
+  Address,
+  EthBalance,
+} from "@coinbase/onchainkit/identity";
 import { FiCreditCard, FiUser } from "react-icons/fi";
 import { useWalletClient } from "wagmi";
 
@@ -24,10 +30,10 @@ export default function WalletConnectButton() {
               <span>Connect Wallet</span>
             </button>
           ) : (
-            <button className="relative flex items-center gap-2 px-5 py-2 bg-green-500 text-white font-bold rounded-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all">
+            <div className="flex items-center gap-2 px-5 py-2 bg-green-500 text-white font-bold rounded-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all">
               <FiUser className="text-lg" />
-              <span>Connected</span>
-            </button>
+              <Name className="text-inherit" />
+            </div>
           )}
         </ConnectWallet>
         <WalletDropdown>
@@ -35,6 +41,7 @@ export default function WalletConnectButton() {
             <Avatar />
             <Name />
             <Address />
+            <EthBalance />
           </Identity>
           <WalletDropdownDisconnect />
         </WalletDropdown>

@@ -56,68 +56,6 @@ export default function CastImportForm({
   );
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
 
-  // Auto-detect URL from clipboard on component mount
-  useEffect(() => {
-    const tryReadClipboard = async () => {
-      try {
-        // Only try to access clipboard if the user has interacted with the page
-        if (document.hasFocus() && inputRef.current) {
-          const clipboardText = await navigator.clipboard.readText();
-
-          // Check if clipboard contains what looks like a Farcaster URL or hash
-          if (isValidFarcasterInput(clipboardText) && !castUrl) {
-            // Don't auto-fill, just show the paste button
-            setPasteSuccess(true);
-          }
-        }
-      } catch {
-        // Clipboard access may be denied, that's fine
-        console.log("Clipboard access not available");
-      }
-    };
-
-    // Only try to read clipboard if we don't have an initial URL
-    if (!initialCastUrl) {
-      tryReadClipboard();
-    }
-
-    // TEST: Try parsing example URL to verify fix (will show in console)
-    const testUrl = "https://warpcast.com/overproticol/0x5cd3f740";
-    const testFullHash = "0x5cd3f74090cf546afcc8d5e5398740adea6b380d";
-
-    console.log("TEST - Is URL valid:", isValidFarcasterInput(testUrl));
-    console.log(
-      "TEST - Is full hash valid:",
-      isValidFarcasterInput(testFullHash),
-    );
-
-    try {
-      const urlObj = new URL(testUrl);
-      const pathParts = urlObj.pathname.split("/").filter(Boolean);
-      console.log("TEST - URL path parts:", pathParts);
-
-      const hashPart = pathParts.find((part) => part.startsWith("0x"));
-      console.log("TEST - Extracted hash part:", hashPart);
-
-      console.log("TEST - Hash match:", hashPart === "0x5cd3f740");
-      console.log(
-        "TEST - Hash is prefix of full hash:",
-        testFullHash.startsWith(hashPart || ""),
-      );
-    } catch (e) {
-      console.error("TEST - Error parsing URL:", e);
-    }
-  }, [castUrl, initialCastUrl]);
-
-  // When extractedHash changes, fetch preview
-  useEffect(() => {
-    if (extractedHash && !error) {
-      fetchCastPreview(extractedHash);
-    } else {
-      setCastPreview(null);
-    }
-  }, [extractedHash, error]);
-
   // Check if input looks like a valid Farcaster input
   const isValidFarcasterInput = useCallback((input: string): boolean => {
     if (!input) return false;
@@ -167,6 +105,69 @@ export default function CastImportForm({
       return false;
     }
   }, []);
+
+  // Auto-detect URL from clipboard on component mount
+  useEffect(() => {
+    const tryReadClipboard = async () => {
+      try {
+        // Only try to access clipboard if the user has interacted with the page
+        if (document.hasFocus() && inputRef.current) {
+          const clipboardText = await navigator.clipboard.readText();
+
+          // Check if clipboard contains what looks like a Farcaster URL or hash
+          if (isValidFarcasterInput(clipboardText) && !castUrl) {
+            // Don't auto-fill, just show the paste button
+            setPasteSuccess(true);
+          }
+        }
+      } catch {
+        // Clipboard access may be denied, that's fine
+        console.log("Clipboard access not available");
+      }
+    };
+
+    // Only try to read clipboard if we don't have an initial URL
+    if (!initialCastUrl) {
+      tryReadClipboard();
+    }
+
+    // Debug function to test various URL formats
+    const testUrl = "https://warpcast.com/sardius/0x5cd3f740";
+    const testFullHash =
+      "0x5cd3f740394c3a78554d53abac0d781324754dd48647a6a8b0d7678c9e9497e6";
+
+    console.log("TEST - URL valid:", isValidFarcasterInput(testUrl));
+    console.log(
+      "TEST - Is full hash valid:",
+      isValidFarcasterInput(testFullHash),
+    );
+
+    try {
+      const urlObj = new URL(testUrl);
+      const pathParts = urlObj.pathname.split("/").filter(Boolean);
+      console.log("TEST - URL path parts:", pathParts);
+
+      const hashPart = pathParts.find((part) => part.startsWith("0x"));
+      console.log("TEST - Extracted hash part:", hashPart);
+
+      console.log("TEST - Hash match:", hashPart === "0x5cd3f740");
+      console.log(
+        "TEST - Hash is prefix of full hash:",
+        testFullHash.startsWith(hashPart || ""),
+      );
+    } catch (e) {
+      console.error("TEST - Error parsing URL:", e);
+    }
+  }, [castUrl, initialCastUrl, isValidFarcasterInput]);
+
+  // When extractedHash changes, fetch preview
+  useEffect(() => {
+    if (extractedHash && !error) {
+      fetchCastPreview(extractedHash);
+    } else {
+      setCastPreview(null);
+    }
+  }, [extractedHash, error]);
 
   const extractCastData = useCallback(async (url: string) => {
     // Handle different formats of Farcaster URLs and hashes

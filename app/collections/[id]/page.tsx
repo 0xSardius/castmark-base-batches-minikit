@@ -19,7 +19,6 @@ import CollectionForm from "@/components/collection/CollectionForm";
 import RegisterButton from "@/components/collection/RegisterButton";
 import WalletConnectButton from "@/components/auth/WalletConnectButton";
 import { formatDistanceToNow } from "date-fns";
-import { useWalletClient } from "wagmi";
 
 declare global {
   interface Window {
@@ -35,7 +34,6 @@ export default function CollectionDetailPage({
   const { setFrameReady, isFrameReady } = useMiniKit();
   const openUrl = useOpenUrl();
   const { dbUser } = useUser();
-  const { data: walletClient } = useWalletClient();
 
   const {
     selectedCollection,

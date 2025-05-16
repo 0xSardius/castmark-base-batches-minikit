@@ -237,7 +237,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     };
 
     checkSession();
-  }, []);
+  }, [loadOrCreateUser]);
 
   // Get user context from MiniKit and load or create user in database
   useEffect(() => {
@@ -251,7 +251,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } else if (!loading) {
       setAuthAttempted(true);
     }
-  }, [context, loading]);
+  }, [context, loading, loadOrCreateUser]);
 
   const handleSignIn = async (): Promise<boolean> => {
     try {
