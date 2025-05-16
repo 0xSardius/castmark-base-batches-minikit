@@ -233,13 +233,11 @@ export default function CollectionDetailPage({
       </div>
 
       {/* Connect Wallet Button */}
-      {!walletClient && (
-        <div className="w-full max-w-3xl mb-6 px-4">
-          <div className="flex justify-center">
-            <WalletConnectButton />
-          </div>
+      <div className="w-full max-w-3xl mb-6 px-4">
+        <div className="flex justify-center">
+          <WalletConnectButton />
         </div>
-      )}
+      </div>
 
       {/* Share Modal */}
       {showShareModal && (
