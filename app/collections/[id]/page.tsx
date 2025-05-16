@@ -181,8 +181,8 @@ export default function CollectionDetailPage({
         </div>
       )}
 
-      {/* Share Button */}
-      <div className="flex justify-end gap-4 mb-4 w-full max-w-3xl">
+      {/* Share and Register Buttons */}
+      <div className="flex justify-end gap-6 mb-6 mt-4 w-full max-w-3xl p-2">
         <WalletConnectButton />
         <RegisterButton collection={selectedCollection} />
         <button
@@ -210,7 +210,7 @@ export default function CollectionDetailPage({
               }
             }
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-400 text-black font-black rounded-lg border-4 border-black shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] active:shadow-none transition-all text-lg"
+          className="flex items-center gap-2 px-5 py-2 bg-purple-400 text-black font-black rounded-lg border-4 border-black shadow-[4px_4px_0_0_#000] hover:shadow-[2px_2px_0_0_#000] active:shadow-none transition-all text-lg"
         >
           <FiShare2 /> Share
         </button>

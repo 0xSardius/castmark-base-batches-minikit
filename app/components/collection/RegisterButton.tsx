@@ -107,7 +107,7 @@ export default function RegisterButton({ collection }: RegisterButtonProps) {
     <button
       onClick={handleRegister}
       disabled={isLoading}
-      className={`flex items-center gap-2 px-4 py-2 bg-purple-400 text-black font-bold rounded-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all ${isLoading ? "opacity-70" : ""}`}
+      className={`flex items-center gap-2 px-5 py-2 bg-purple-400 text-black font-bold rounded-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all ${isLoading ? "opacity-70" : ""}`}
     >
       <FiDatabase />
       {isLoading ? "Registering..." : "Register on Base"}
