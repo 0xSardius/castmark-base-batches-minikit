@@ -3,13 +3,7 @@ import "@coinbase/onchainkit/styles.css";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import dynamic from "next/dynamic";
-
-// Import QuickCastmarkButton with no SSR to avoid hydration issues
-const QuickCastmarkButton = dynamic(
-  () => import("./components/ui/QuickCastmarkButton"),
-  { ssr: false },
-);
+import QuickCastmarkButtonWrapper from "./components/ui/QuickCastmarkButtonWrapper";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -55,7 +49,7 @@ export default function RootLayout({
       <body className="bg-background">
         <Providers>
           {children}
-          <QuickCastmarkButton />
+          <QuickCastmarkButtonWrapper />
         </Providers>
       </body>
     </html>
