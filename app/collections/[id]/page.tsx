@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useMiniKit, useOpenUrl } from "@coinbase/onchainkit/minikit";
 import {
   FiArrowLeft,
@@ -29,8 +29,9 @@ declare global {
 export default function CollectionDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = use(params);
   const { setFrameReady, isFrameReady } = useMiniKit();
   const openUrl = useOpenUrl();
   const { dbUser } = useUser();
@@ -60,15 +61,15 @@ export default function CollectionDetailPage({
 
   // Fetch collection and bookmarks
   useEffect(() => {
-    if (dbUser?.id && params.id) {
+    if (dbUser?.id && id) {
       fetchCollections(dbUser.id).then(() => {
         // After collections are fetched, set the selected collection
         const collection = useCollectionStore
           .getState()
-          .collections.find((c) => c.id === params.id);
+          .collections.find((c) => c.id === id);
         if (collection) {
           selectCollection(collection);
-          fetchCollectionItems(params.id);
+          fetchCollectionItems(id);
         }
       });
 
@@ -76,7 +77,7 @@ export default function CollectionDetailPage({
     }
   }, [
     dbUser,
-    params.id,
+    id,
     fetchCollections,
     fetchCollectionItems,
     fetchBookmarks,
@@ -343,7 +344,7 @@ export default function CollectionDetailPage({
             fetchCollections(dbUser?.id || "");
             const updatedCollection = useCollectionStore
               .getState()
-              .collections.find((c) => c.id === params.id);
+              .collections.find((c) => c.id === id);
             if (updatedCollection) {
               selectCollection(updatedCollection);
             }
