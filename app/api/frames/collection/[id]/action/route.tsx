@@ -3,10 +3,11 @@ import { supabase } from "@/lib/supabase";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const collectionId = params.id;
+    const { id } = await params;
+    const collectionId = id;
     const body = await req.json();
     const buttonIndex = body?.untrustedData?.buttonIndex || 1;
 

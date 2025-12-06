@@ -6,10 +6,11 @@ export const runtime = "edge";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const collectionId = params.id;
+    const { id } = await params;
+    const collectionId = id;
 
     // Get collection from database
     const { data: collection, error: collectionError } = await supabase
