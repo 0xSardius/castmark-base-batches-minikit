@@ -8,7 +8,16 @@ const nextConfig = {
   },
   // Configure allowed image domains
   images: {
-    domains: ["imagedelivery.net", "res.cloudinary.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "imagedelivery.net",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+    ],
   },
 };
 
